@@ -34,11 +34,11 @@ import { bootstrapLogger } from '@/utils/loggers';
 bootstrapLogger();
 
 const defaultAppConfigImpl: AppConfig = {
-  initialSchemaVersion(): string {
-    return process.env.INITIAL_SCHEMA_VERSION || '';
+  dictionaryVersion(): string {
+    return process.env.DICTIONARY_VERSION || '';
   },
-  schemaName(): string {
-    return process.env.SCHEMA_NAME || '';
+  dictionaryName(): string {
+    return process.env.DICTIONARY_NAME || '';
   },
   schemaServiceUrl: function (): string {
     return process.env.LECTERN_URL || '';

@@ -50,7 +50,7 @@ class App {
 
   private routerSetup() {
     this.app.use('/', indexRouter);
-    this.app.use('/validate', validatorRouter);
+    this.app.use('/validation', validatorRouter);
     this.app.use('/dictionary', dictionaryRouter);
   }
 

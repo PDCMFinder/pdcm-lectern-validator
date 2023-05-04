@@ -15,8 +15,8 @@
  *******************************************************************************/
 
 export interface AppConfig {
-    schemaName(): string;
-    initialSchemaVersion(): string;
+    dictionaryName(): string;
+    dictionaryVersion(): string;
     schemaServiceUrl(): string;
 }
 

@@ -26,7 +26,7 @@ export const run = async (config: AppConfig) => {
     // setup dictionary service
   try {
     dictionaryService.create(config.schemaServiceUrl());
-    await loadSchema(config.schemaName(), config.initialSchemaVersion());
+    await loadSchema(config.dictionaryName(), config.dictionaryVersion());
   } catch (err) {
     logger.error('failed to load schema', err);
   }

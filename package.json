@@ -9,7 +9,6 @@
   "dependencies": {
     "@overturebio-stack/lectern-client": "^1.4.0",
     "cookie-parser": "~1.4.4",
-    "csv-parser": "^3.0.0",
     "debug": "~2.6.9",
     "dotenv": "^16.0.0",
     "express": "~4.16.1",
