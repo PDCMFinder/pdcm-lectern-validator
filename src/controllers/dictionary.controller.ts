@@ -21,14 +21,7 @@ const asyncHandler = require('express-async-handler')
 
 
 exports.dictionary_get = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    const text = req.body;
-    const id = Math.random().toString();
-    const newTodo = {id: id, text: text};
-
-    // Call the manager!
-
-    let y = dictionaryService.instance().getLatestVersionDictionaty();
-
-
-    res.status(201).json({message: 'Data was validated successfully',   createdTodo: y});
+    const dictionary = dictionaryService.instance().getLatestVersionDictionary();
+    res.status(201).json(dictionary);
   });
+  

@@ -14,21 +14,20 @@
  * License.
  *******************************************************************************/
 
+import { ProcessedFile } from '@/models/validation.model';
 import { getLogger } from '@/utils/loggers';
 const XLSX = require("xlsx"); 
-import fs from "fs";
 
 const logger = getLogger('fileProcessor');
 
 class FileProcessor {
 
     /**
-     * Read one Excel file from the request. Transforms the data in a suitable dictionary.
+     * Read one Excel file from the request. Transforms the data in a suitable format to be validated.
      * @param req Request that holds the Excel to process
-     * @returns A dictionary where the key is the name of the tsv file and the value is a list
-     * of dictionaries, where each one containing the records of each file.
+     * @returns A ProcessedFile object with the sheets and rows as a dictionary.
      */
-    public async processExcelFile(req: any): Promise<Map<string, any>> {
+    public async processExcelFile(req: any): Promise<ProcessedFile> {
         const resultMap: Map<string, any> = new Map();
         logger.warn("processExcelFile >> req.file:", req.file)
         if (!req.file) {
@@ -44,7 +43,12 @@ class FileProcessor {
             resultMap.set(sheet, data);
         });
 
-        return Promise.resolve(resultMap);
+        const processedFile: ProcessedFile = {
+            fileName: req.file.originalname,
+            data: resultMap
+        }
+
+        return Promise.resolve(processedFile);
     }
 }
 

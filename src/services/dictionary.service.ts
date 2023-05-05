@@ -33,7 +33,34 @@ class DictionaryService {
     version: '',
   };
 
+  private validationDictionaryName: string = '';
+  private validationDictionaryVersion: string = '';
+
   constructor(private schemaServiceUrl: string) { }
+
+  /**
+   * Fetches a specific dictionary from Lectern. This version will (usually the lastest) will be the one
+   * to be used to validate excel files submited by the users.
+   * @param name Name of the dictionary to use in the validations
+   * @param version Version of the dictionary to use in the validations
+   */
+  loadValidationDictionary = async (
+    name: string,
+    version: string,
+  ): Promise<dictionaryEntities.SchemasDictionary> => {
+    try {
+      logger.info(`Fetching dictionary to validations. Name: ${name} - Version: ${version}`);
+      const newSchema = await dictionaryRestClient.fetchSchema(this.schemaServiceUrl, name, version);
+      logger.info("Dictionary fetched successfully");
+      this.latestVersionDictionary = newSchema;
+      // Sets the version used for reference
+      this.setValidationDictionaryInformation(name, version);
+      return newSchema;
+    } catch (err) {
+      logger.error('Failed to fetch dictionary: ', err);
+      throw new Error('Failed to fetch dictionary: ' + err);
+    }
+  }
 
   loadSchemaByVersion = async (
     name: string,
@@ -55,8 +82,21 @@ class DictionaryService {
     }
   };
 
-  getLatestVersionDictionaty() {
+  setValidationDictionaryInformation(dictionaryName: string, dictionaryVersion: string) {
+    this.validationDictionaryName = dictionaryName;
+    this.validationDictionaryVersion = dictionaryVersion;
+  }
+
+  getLatestVersionDictionary() {
     return this.latestVersionDictionary;
+  }
+
+  getValidationDictionaryName() {
+    return this.validationDictionaryName;
+  }
+
+  getValidationDictionaryVersion() {
+    return this.validationDictionaryVersion;
   }
 
 }

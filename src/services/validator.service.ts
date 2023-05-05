@@ -22,6 +22,8 @@ import FileProcessor from '../utils/fileProcessor'
 import * as dictionaryService from '../services/dictionary.service';
 
 import { getLogger } from '@/utils/loggers';
+import { ProcessedFile, SheetValidationResult, ValidationReport, ValidationResultStatus } from '@/models/validation.model';
+import { SchemasDictionary } from '@overturebio-stack/lectern-client/lib/schema-entities';
 
 const logger = getLogger('VALIDATOR_SERVICE');
 const fileProcessor = new FileProcessor();
@@ -30,38 +32,86 @@ class ValidatorService {
 
   constructor() { }
 
- /**
-  * Reads the content of an Excel file from the request and validates its content against a 
-  * JSON schema (a dictionary in Lectern).
-  */
-  public async validateExcelFile(req: any): Promise<any> {
+  /**
+   * Reads the content of an Excel file from the request and validates its content against a 
+   * JSON schema (a dictionary in Lectern).
+   */
+  public async validateExcelFile(req: any): Promise<ValidationReport> {
     logger.info('Validating excel file');
+    const sheetsValidationResults: SheetValidationResult[] = [];
     const results: Map<string, any> = new Map();
-    const resultMap: Map<string, any> = await fileProcessor.processExcelFile(req);
-    resultMap.forEach((value, key) => {
-      logger.info("About to validate data from file:", key);
-      // const schemaName = this.getSchemaNameFromFileName(key);
-      const schemaName = key;
-      console.log('schemaName', schemaName);
 
+    // Get an object with all the data from the Excel file
+    const processedFile: ProcessedFile = await fileProcessor.processExcelFile(req);
 
-      let records: any[] = []
-      value.forEach((element: any) => {
-        records.push(element);
-      });
+    // Get the dictionary to use in the validations. Fetched from the Lectern instance.
+    const validationDictionary = dictionaryService.instance().getLatestVersionDictionary();
 
-      let dictionary = dictionaryService.instance().getLatestVersionDictionaty();
-
-      const validationResults = lecternSchemaFunctions.processRecords(dictionary, schemaName, records);
-      results.set(schemaName, validationResults.validationErrors);
+    processedFile.data.forEach((value, key) => {
+      const sheetValidationResult: SheetValidationResult = this.#processSheet(key, value, validationDictionary)
+      sheetsValidationResults.push(sheetValidationResult);
     })
 
-    return Promise.resolve(results);
+    const validationReport: ValidationReport = this.#buildReport(
+      processedFile.fileName, validationDictionary.name, validationDictionary.version, sheetsValidationResults);
+
+    return Promise.resolve(validationReport);
+  }
+
+  #processSheet(sheetName: string, records: Map<string, any>, dictionary: SchemasDictionary): SheetValidationResult {
+    // For now the schema is the plain sheet name, but this will change later when working with examples where
+    // some cleaning in the name will be needed
+    const schemaName = sheetName;
+
+    const sheetRows: any[] = [...records.values()]
+
+    // Call the lectern validator
+    const validationResults = lecternSchemaFunctions.processRecords(dictionary, schemaName, sheetRows);
+
+    const sheetValidationStatus =
+        validationResults.validationErrors.length > 0
+          ? ValidationResultStatus.INVALID
+          : ValidationResultStatus.VALID;
+
+    const sheetValidationResult: SheetValidationResult = {
+      sheetName: sheetName,
+      schema: schemaName,
+      status: sheetValidationStatus,
+      result: validationResults.validationErrors
+    };
+
+    return sheetValidationResult;
   }
 
   getSchemaNameFromFileName(fileName: string): string {
     const idx = fileName.indexOf('.');
     return fileName.slice(0, idx);
+  }
+
+  #buildReport(
+    fileName: string,
+    dictionaryName: string,
+    dictionaryVersion: string,
+    sheetsValidationResults: SheetValidationResult[]): ValidationReport {
+
+    const reportStatus = this.#getUnifiedStatus(sheetsValidationResults)
+
+    const validationReport: ValidationReport = {
+      date: new Date(),
+      fileName: fileName,
+      status: reportStatus,
+      dictionaryName: dictionaryName,
+      dictionaryVersion: dictionaryVersion,
+      sheetsValidationResults: sheetsValidationResults
+    };
+
+    return validationReport;
+  }
+
+  #getUnifiedStatus(sheetsValidationResults: SheetValidationResult[]): ValidationResultStatus {
+    const anyInvalid: boolean = sheetsValidationResults
+      .some((x) => x.status != ValidationResultStatus.VALID);
+    return anyInvalid ? ValidationResultStatus.INVALID : ValidationResultStatus.VALID;
   }
 
 }

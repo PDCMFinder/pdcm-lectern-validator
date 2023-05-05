@@ -14,23 +14,29 @@
  * License.
  *******************************************************************************/
 
-const asyncHandler = require('express-async-handler')
+export enum ValidationResultStatus {
+    VALID = 'valid',
+    INVALID = 'invalid',
+    NOT_PROCESSED = 'not_processed',
+}
 
-import { NextFunction, Response } from "express";
-import ValidatorService from '../services/validator.service'
+export interface ProcessedFile {
+    fileName: string;
+    data: Map<string, any>;
+}
 
-const validatorService = new ValidatorService();
+export interface SheetValidationResult {
+    sheetName: string;
+    schema: string;
+    status: ValidationResultStatus;
+    result: any[];
+}
 
-/**
- * Reads the content of an Excel file from the request and validates its content against a 
- * JSON schema (a dictionary in Lectern).
- */
-export const validateExcelData = asyncHandler(async (req: any, res: Response, next: NextFunction) => {
-  try {
-    const validationReport = await validatorService.validateExcelFile(req);
-    res.status(201).send(validationReport);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('error');
-  }
-});
+export interface ValidationReport {
+    date: Date;
+    fileName: string;
+    status: ValidationResultStatus;
+    dictionaryName: string;
+    dictionaryVersion: string;
+    sheetsValidationResults: SheetValidationResult[];
+}

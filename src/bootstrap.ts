@@ -32,9 +32,9 @@ export const run = async (config: AppConfig) => {
   }
 }
 
-export async function loadSchema(schemaName: string, initialVersion: string) {
+export async function loadSchema(dictionaryName: string, dictionaryVersion: string) {
     try {
-      await dictionaryService.instance().loadSchemaByVersion(schemaName, initialVersion);
+      await dictionaryService.instance().loadValidationDictionary(dictionaryName, dictionaryVersion);
     } catch (err) {
         logger.error('failed to load the schema', err);
     }
