@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lectern-dev
+  namespace: pdcm-validator-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lectern-dev
+  template:
+    metadata:
+      labels:
+        app: lectern-dev
+    spec:
+      containers:
+      - name: lectern-dev
+        image: ghcr.io/overture-stack/lectern:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MONGO_URL
+          value: mongodb://admin:password@hh-rke-wp-webadmin-20-worker-1.caas.ebi.ac.uk:32000/lectern
