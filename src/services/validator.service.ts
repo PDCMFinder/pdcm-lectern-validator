@@ -39,7 +39,6 @@ class ValidatorService {
   public async validateExcelFile(req: any): Promise<ValidationReport> {
     logger.info('Validating excel file');
     const sheetsValidationResults: SheetValidationResult[] = [];
-    const results: Map<string, any> = new Map();
 
     // Get an object with all the data from the Excel file
     const processedFile: ProcessedFile = await fileProcessor.processExcelFile(req);
