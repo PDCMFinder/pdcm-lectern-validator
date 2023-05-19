@@ -18,6 +18,8 @@ const asyncHandler = require('express-async-handler')
 
 import { NextFunction, Response } from "express";
 import ValidatorService from '../services/validator.service'
+import { validateRequest } from "@/services/request-validator.service";
+import { BadRequest } from "@/exceptions/bad-request.exception";
 
 const validatorService = new ValidatorService();
 
@@ -27,10 +29,17 @@ const validatorService = new ValidatorService();
  */
 export const validateExcelData = asyncHandler(async (req: any, res: Response, next: NextFunction) => {
   try {
+    validateRequest(req);
     const validationReport = await validatorService.validateExcelFile(req);
+    
     res.status(201).send(validationReport);
   } catch (error) {
-    console.error(error);
-    res.status(500).send('error');
+    if (error instanceof BadRequest) {
+      console.log(error.message);
+      res.status(error.errorCode).send(error.message);
+    } else {
+      console.error(error);
+      res.status(500).send('error');
+    }
   }
 });

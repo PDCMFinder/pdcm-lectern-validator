@@ -14,14 +14,10 @@
  * License.
  *******************************************************************************/
 
-import { NextFunction, Request, Response } from "express";
-import * as dictionaryService from '../services/dictionary.service';
-
-const asyncHandler = require('express-async-handler')
-
-
-exports.dictionary_get = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    const dictionary = dictionaryService.instance().getLatestVersionDictionary();
-    res.status(201).json(dictionary);
-  });
-  
+export class BadRequest extends Error {
+    errorCode: number;
+    constructor(errorCode: number, message: string) {
+      super(message);
+      this.errorCode = errorCode;
+    }
+  }
