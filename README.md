@@ -26,12 +26,12 @@ The output of the process is a JSON file describing any errors in the data.
 ## How to use
 
 1. Git clone this repo
-2. Run `npm install`
+2. Run `yarn install`
 
 ## **Scripts**
 
 ```
-DEBUG=pdcm-lectern-validator:* npm start
+yarn start
 ```
 
 ## Acknowledgments
