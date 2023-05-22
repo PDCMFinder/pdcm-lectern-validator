@@ -46,7 +46,7 @@ stages:
   - build-prod
   - deploy-prod
 
-  build_dev_image:
+build_dev_image:
   stage: build-dev
   services:
     - name: $CI_REGISTRY/mouse-informatics/dind:latest
