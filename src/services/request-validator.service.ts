@@ -1,4 +1,4 @@
-/*******************************************************************************
+/** *****************************************************************************
  * Copyright 2023 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the
@@ -12,31 +12,33 @@
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the
  * License.
- *******************************************************************************/
+ ****************************************************************************** */
 
-import { BadRequest } from "@/exceptions/bad-request.exception";
-import { Request } from "express";
+import { type Request } from 'express'
+import { BadRequest } from '@/exceptions/bad-request.exception'
 
 const AcceptedFormats = [
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "application/vnd.ms-excel"]
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-excel']
 
-const validateFileExists = (file: Express.Multer.File | undefined) => {
-    if (!file) {
-        throw new BadRequest(400, `No file uploaded`);
-    }
+const validateFileExists = (file: Express.Multer.File | undefined): void => {
+  if (file == null) {
+    throw new BadRequest(400, 'No file uploaded')
+  }
 }
 
-const validateFileType = (file: Express.Multer.File | undefined) => {
-    const mimetype = file?.mimetype;
-    if (!mimetype || !AcceptedFormats.includes(mimetype)) {
-        throw new BadRequest(
-            400,
-            `Please upload an Excel file. Expected: ${AcceptedFormats}. Obtained: ${mimetype}.`);
-    }
+const validateFileType = (file: Express.Multer.File | undefined): void => {
+  const mimetype = file?.mimetype ?? 'none'
+  if (!AcceptedFormats.includes(mimetype)) {
+    throw new BadRequest(
+      400,
+      `Please upload an Excel file. Expected: ${AcceptedFormats.join(',')}. Obtained: ${mimetype}.`
+    )
+  }
 }
 
-export const validateRequest = (request: Request) => {
-    validateFileExists(request.file);
-    validateFileType(request.file);
+export const validateFileInRequest = (request: Request): Express.Multer.File => {
+  validateFileExists(request.file)
+  validateFileType(request.file)
+  return request.file as Express.Multer.File
 }

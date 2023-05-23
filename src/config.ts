@@ -1,4 +1,4 @@
-/*******************************************************************************
+/** *****************************************************************************
  * Copyright 2023 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the
@@ -12,17 +12,10 @@
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the
  * License.
- *******************************************************************************/
+ ****************************************************************************** */
 
 export interface AppConfig {
-    dictionaryName(): string;
-    dictionaryVersion(): string;
-    schemaServiceUrl(): string;
+  dictionaryName: () => string
+  dictionaryVersion: () => string
+  schemaServiceUrl: () => string
 }
-
-class ConfigManager {
-    constructor(private impl: AppConfig) {}
-    getConfig(): AppConfig {
-      return this.impl;
-    }
-  }

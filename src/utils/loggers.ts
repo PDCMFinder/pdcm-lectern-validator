@@ -1,4 +1,4 @@
-/*******************************************************************************
+/** *****************************************************************************
  * Copyright 2023 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the
@@ -12,16 +12,16 @@
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the
  * License.
- *******************************************************************************/
+ ****************************************************************************** */
 
-import path from 'path';
-import log4js from 'log4js';
-import { configure } from 'log4js';
-export { getLogger } from 'log4js';
+import path from 'path'
+import log4js, { configure } from 'log4js'
 
-export function bootstrapLogger() {
-  const date = new Date();
-  const strDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+export { getLogger } from 'log4js'
+
+export function bootstrapLogger (): void {
+  const date = new Date()
+  const strDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
 
   configure({
     appenders: {
@@ -31,8 +31,8 @@ export function bootstrapLogger() {
     categories: {
       default: { appenders: ['out', 'app'], level: 'debug' }
     }
-  });
+  })
 
-  const logger = log4js.getLogger();
-  logger.level = 'debug';
+  const logger = log4js.getLogger()
+  logger.level = 'debug'
 }

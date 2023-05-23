@@ -6,7 +6,9 @@
     "start": "export NODE_OPTIONS='--trace-deprecation --abort-on-uncaught-exception' && export NODE_ENV=development && nodemon --exec ts-node ./bin/www.ts",
     "build": "sh etc/build.sh",
     "test": "jest",
-    "ijest": "jest --init"
+    "ijest": "jest --init",
+    "eslint": "eslint 'src/**/*.ts'",
+    "eslint:fix": "eslint --fix 'src/**/*.ts'"
   },
   "dependencies": {
     "@overturebio-stack/lectern-client": "^1.4.0",
@@ -43,12 +45,21 @@
     "@types/multer": "^1.4.7",
     "@types/node": "^16.10.2",
     "@types/uniqid": "^5.3.2",
+    "@typescript-eslint/eslint-plugin": "^5.43.0",
+    "@typescript-eslint/parser": "5.59.6",
     "babel-jest": "^29.5.0",
+    "eslint": "^8.0.1",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-config-standard-with-typescript": "^34.0.1",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-n": "^15.0.0",
+    "eslint-plugin-promise": "^6.0.0",
     "jest": "^29.5.0",
     "nodemon": "^2.0.15",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.5"
+    "typescript": "*"
   },
   "_moduleAliases": {
     "@": "./src"

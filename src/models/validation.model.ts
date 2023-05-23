@@ -1,4 +1,4 @@
-/*******************************************************************************
+/** *****************************************************************************
  * Copyright 2023 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the
@@ -12,31 +12,31 @@
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the
  * License.
- *******************************************************************************/
+ ****************************************************************************** */
 
 export enum ValidationResultStatus {
-    VALID = 'valid',
-    INVALID = 'invalid',
-    NOT_PROCESSED = 'not_processed',
+  VALID = 'valid',
+  INVALID = 'invalid',
+  NOT_PROCESSED = 'not_processed',
 }
 
 export interface ProcessedFile {
-    fileName: string;
-    data: Map<string, any>;
+  fileName: string
+  data: Map<string, any>
 }
 
 export interface SheetValidationResult {
-    sheetName: string;
-    schema: string;
-    status: ValidationResultStatus;
-    result: any[];
+  sheetName: string
+  schema: string
+  status: ValidationResultStatus
+  result: any[]
 }
 
 export interface ValidationReport {
-    date: Date;
-    fileName: string;
-    status: ValidationResultStatus;
-    dictionaryName: string;
-    dictionaryVersion: string;
-    sheetsValidationResults: SheetValidationResult[];
+  date: Date
+  fileName: string
+  status: ValidationResultStatus
+  dictionaryName: string
+  dictionaryVersion: string
+  sheetsValidationResults: SheetValidationResult[]
 }

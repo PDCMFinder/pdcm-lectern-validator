@@ -1,5 +1,4 @@
-
-/*******************************************************************************
+/** *****************************************************************************
  * Copyright 2023 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the
@@ -13,29 +12,29 @@
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the
  * License.
- *******************************************************************************/
+ ****************************************************************************** */
 
-import { getLogger } from '@/utils/loggers';
-import * as dictionaryService from './services/dictionary.service';
-import { AppConfig } from './config';
+import { getLogger } from '@/utils/loggers'
+import * as dictionaryService from './services/dictionary.service'
+import { type AppConfig } from './config'
 
-const logger = getLogger('BOOTSTRAP');
+const logger = getLogger('BOOTSTRAP')
 
-export const run = async (config: AppConfig) => {
-    logger.info("Initializing...")
-    // setup dictionary service
+export const run = async (config: AppConfig): Promise<void> => {
+  logger.info('Initializing...')
+  // setup dictionary service
   try {
-    dictionaryService.create(config.schemaServiceUrl());
-    await loadSchema(config.dictionaryName(), config.dictionaryVersion());
+    dictionaryService.create(config.schemaServiceUrl())
+    await loadSchema(config.dictionaryName(), config.dictionaryVersion())
   } catch (err) {
-    logger.error('failed to load schema', err);
+    logger.error('failed to load schema', err)
   }
 }
 
-export async function loadSchema(dictionaryName: string, dictionaryVersion: string) {
-    try {
-      await dictionaryService.instance().loadValidationDictionary(dictionaryName, dictionaryVersion);
-    } catch (err) {
-        logger.error('failed to load the schema', err);
-    }
+export async function loadSchema (dictionaryName: string, dictionaryVersion: string): Promise<void> {
+  try {
+    await dictionaryService.instance().loadValidationDictionary(dictionaryName, dictionaryVersion)
+  } catch (err) {
+    logger.error('failed to load the schema', err)
   }
+}
