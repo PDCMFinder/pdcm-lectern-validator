@@ -26,6 +26,7 @@ import {
   type ProcessedFile, type SheetValidationResult, type ValidationReport, ValidationResultStatus, type MutableSchemaValidationError
 } from '@/models/validation.model'
 import { ConfigurationException } from '@/exceptions/configuration.exception'
+import { BadRequestException } from '@/exceptions/bad-request.exception'
 
 const logger = getLogger('VALIDATOR_SERVICE')
 const fileProcessor = new FileProcessor()
@@ -59,36 +60,36 @@ class ValidatorService {
     return await Promise.resolve(validationReport)
   }
 
-  #processSheet (sheetName: string, records: Map<string, any>, dictionary: SchemasDictionary): SheetValidationResult {
-    // For now the schema is the plain sheet name, but this will change later when working with examples where
-    // some cleaning in the name will be needed
-    const schemaName = sheetName
+  #processSheet (schemaName: string, records: Map<string, any>, dictionary: SchemasDictionary): SheetValidationResult {
+    const sheetValidationResult: SheetValidationResult = {
+      sheetName: schemaName
+    }
 
     const sheetRows: any[] = [...records.values()]
 
-    // Call the lectern validator
-    const validationResults = lecternSchemaFunctions.processRecords(dictionary, schemaName, sheetRows)
+    try {
+      // Call the lectern validator
+      const validationResults = lecternSchemaFunctions.processRecords(dictionary, schemaName, sheetRows)
 
-    const sheetValidationStatus = validationResults.validationErrors.length > 0
-      ? ValidationResultStatus.INVALID
-      : ValidationResultStatus.VALID
+      const sheetValidationStatus = validationResults.validationErrors.length > 0
+        ? ValidationResultStatus.INVALID
+        : ValidationResultStatus.VALID
 
-    // SchemaValidationError is read only so we need to copy data to a structure without those restrictions
-    const validationErrors: MutableSchemaValidationError[] = validationResults.validationErrors.map(x =>
-      ({
-        errorType: x.errorType,
-        index: x.index,
-        fieldName: x.fieldName,
-        info: x.info,
-        message: x.message
-      })
-    )
+      // SchemaValidationError is read only so we need to copy data to a structure without those restrictions
+      const validationErrors: MutableSchemaValidationError[] = validationResults.validationErrors.map((x: any) =>
+        ({
+          errorType: x.errorType,
+          index: x.index,
+          fieldName: x.fieldName,
+          info: x.info,
+          message: x.message
+        })
+      )
 
-    const sheetValidationResult: SheetValidationResult = {
-      sheetName,
-      schema: schemaName,
-      status: sheetValidationStatus,
-      result: validationErrors
+      sheetValidationResult.status = sheetValidationStatus
+      sheetValidationResult.result = validationErrors
+    } catch (error) {
+      throw new BadRequestException(error as string)
     }
 
     return sheetValidationResult

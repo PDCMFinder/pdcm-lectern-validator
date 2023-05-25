@@ -14,7 +14,15 @@
  * License.
  ****************************************************************************** */
 
+import { StatusCodes } from 'http-status-codes'
 import { RequestExeption } from './request.exception'
 
 export class BadRequestException extends RequestExeption {
+  constructor (message: string, statusCode?: StatusCodes) {
+    if (statusCode) {
+      super(statusCode, message)
+    } else {
+      super(StatusCodes.BAD_REQUEST, message)
+    }
+  }
 }

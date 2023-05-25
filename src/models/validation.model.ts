@@ -33,9 +33,8 @@ export type MutableSchemaValidationError = {
 
 export interface SheetValidationResult {
   sheetName: string
-  schema: string
-  status: ValidationResultStatus
-  result: MutableSchemaValidationError[]
+  status?: ValidationResultStatus
+  result?: MutableSchemaValidationError[]
 }
 
 export interface ValidationReport {

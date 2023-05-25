@@ -1289,8 +1289,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@overturebio-stack/lectern-client@file:../../../sandbox/set-aside/js-lectern-client-master":
+"@overturebio-stack/lectern-client@^1.4.0":
   version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@overturebio-stack/lectern-client/-/lectern-client-1.4.0.tgz#825d1d67f3d896e0fbd1ccb8dcf8f72e03508138"
+  integrity sha512-+T16UkGEOvAkt/QwfQwjO1C/kUzA71r9pjBfn/yymCBmpA5rabflMAYB8HjcVsCltoqamClMQiNAV1K+iaJOLA==
   dependencies:
     cd "^0.3.3"
     deep-freeze "^0.0.1"

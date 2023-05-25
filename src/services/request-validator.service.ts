@@ -24,7 +24,7 @@ const AcceptedFormats = [
 
 const validateFileExists = (file: Express.Multer.File | undefined): void => {
   if (file == null) {
-    throw new BadRequestException(StatusCodes.BAD_REQUEST, 'No file uploaded')
+    throw new BadRequestException('No file uploaded', StatusCodes.BAD_REQUEST)
   }
 }
 
@@ -32,8 +32,8 @@ const validateFileType = (file: Express.Multer.File | undefined): void => {
   const mimetype = file?.mimetype ?? 'none'
   if (!AcceptedFormats.includes(mimetype)) {
     throw new BadRequestException(
-      StatusCodes.UNSUPPORTED_MEDIA_TYPE,
-      `Please upload an Excel file. Expected: ${AcceptedFormats.join(',')}. Obtained: ${mimetype}.`
+      `Please upload an Excel file. Expected: ${AcceptedFormats.join(',')}. Obtained: ${mimetype}.`,
+      StatusCodes.UNSUPPORTED_MEDIA_TYPE
     )
   }
 }
