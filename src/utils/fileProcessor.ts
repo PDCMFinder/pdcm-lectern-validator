@@ -35,7 +35,8 @@ class FileProcessor {
     logger.info('Sheets:', sheets)
     sheets.forEach((sheet: any) => {
       const data = XLSX.utils.sheet_to_json(wb.Sheets[sheet], opts)
-      resultMap.set(sheet, data)
+      const dataWithoutComments = removeComments(data)
+      resultMap.set(sheet, dataWithoutComments)
     })
 
     const processedFile: ProcessedFile = {
@@ -45,6 +46,18 @@ class FileProcessor {
 
     return await Promise.resolve(processedFile)
   }
+}
+
+const removeComments = (data: any[]): any[] => {
+  return data.filter(record => !(shouldIgnoreRecord(record)))
+}
+
+const shouldIgnoreRecord = (record: any): boolean => {
+  if ('Field' in record) {
+    const valueAsString = record.Field as string
+    return valueAsString.startsWith('#')
+  }
+  return false
 }
 
 export default FileProcessor
