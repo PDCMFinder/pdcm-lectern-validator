@@ -15,7 +15,8 @@
  ****************************************************************************** */
 
 import { type Request } from 'express'
-import { BadRequest } from '@/exceptions/bad-request.exception'
+import { BadRequestException } from '@/exceptions/bad-request.exception'
+import { StatusCodes } from 'http-status-codes'
 
 const AcceptedFormats = [
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -23,15 +24,15 @@ const AcceptedFormats = [
 
 const validateFileExists = (file: Express.Multer.File | undefined): void => {
   if (file == null) {
-    throw new BadRequest(400, 'No file uploaded')
+    throw new BadRequestException(StatusCodes.BAD_REQUEST, 'No file uploaded')
   }
 }
 
 const validateFileType = (file: Express.Multer.File | undefined): void => {
   const mimetype = file?.mimetype ?? 'none'
   if (!AcceptedFormats.includes(mimetype)) {
-    throw new BadRequest(
-      400,
+    throw new BadRequestException(
+      StatusCodes.UNSUPPORTED_MEDIA_TYPE,
       `Please upload an Excel file. Expected: ${AcceptedFormats.join(',')}. Obtained: ${mimetype}.`
     )
   }

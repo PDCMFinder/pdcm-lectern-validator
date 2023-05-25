@@ -40,7 +40,7 @@ const defaultAppConfigImpl: AppConfig = {
   dictionaryName(): string {
     return process.env.DICTIONARY_NAME || '';
   },
-  schemaServiceUrl: function (): string {
+  dictionaryServiceUrl: function (): string {
     return process.env.LECTERN_URL || '';
   }
 }

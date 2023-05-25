@@ -20,23 +20,20 @@ import {
 } from '@overturebio-stack/lectern-client'
 
 import { getLogger } from '@/utils/loggers'
+import { ConfigurationException } from '@/exceptions/configuration.exception'
 
 const logger = getLogger('DICTIONARY_SERVICE')
 
 let dictionaryService: DictionaryService
 
 class DictionaryService {
-  private latestVersionDictionary: dictionaryEntities.SchemasDictionary = {
-    schemas: [],
-    name: '',
-    version: ''
-  }
+  private latestVersionDictionary: dictionaryEntities.SchemasDictionary | undefined = undefined
 
   private validationDictionaryName = ''
 
   private validationDictionaryVersion = ''
 
-  constructor (private readonly schemaServiceUrl: string) { }
+  constructor (private readonly dictionaryServiceUrl: string) { }
 
   /**
    * Fetches a specific dictionary from Lectern. This version will (usually the lastest) will be the one
@@ -44,21 +41,19 @@ class DictionaryService {
    * @param name Name of the dictionary to use in the validations
    * @param version Version of the dictionary to use in the validations
    */
-  loadValidationDictionary = async (
-    name: string,
-    version: string
-  ): Promise<dictionaryEntities.SchemasDictionary> => {
+  loadValidationDictionary = async (name: string, version: string): Promise<dictionaryEntities.SchemasDictionary> => {
     try {
-      logger.info(`Fetching dictionary to validations. Name: ${name} - Version: ${version}`)
-      const newSchema = await dictionaryRestClient.fetchSchema(this.schemaServiceUrl, name, version)
+      logger.info(`Fetching validation dictionary. Name: ${name} - Version: ${version}`)
+      const validationDictionary = await dictionaryRestClient.fetchSchema(this.dictionaryServiceUrl, name, version)
       logger.info('Dictionary fetched successfully')
-      this.latestVersionDictionary = newSchema
+      this.latestVersionDictionary = validationDictionary
       // Sets the version used for reference
       this.setValidationDictionaryInformation(name, version)
-      return newSchema
+      return validationDictionary
     } catch (err) {
-      logger.error('Failed to fetch dictionary: ', err)
-      throw new Error(`Failed to fetch dictionary: ${err as string}`)
+      let errorMessage = `Could not fetch dictionary from ${this.dictionaryServiceUrl}.`
+      errorMessage += ` Check that Lectern is running and that a dictionary named [${name}] with version ${version} exists.`
+      throw new ConfigurationException(errorMessage)
     }
   }
 
@@ -68,7 +63,7 @@ class DictionaryService {
   ): Promise<dictionaryEntities.SchemasDictionary> => {
     try {
       const newSchema = await dictionaryRestClient.fetchSchema(
-        this.schemaServiceUrl,
+        this.dictionaryServiceUrl,
         name,
         version
       )
@@ -87,7 +82,7 @@ class DictionaryService {
     this.validationDictionaryVersion = dictionaryVersion
   }
 
-  getLatestVersionDictionary (): dictionaryEntities.SchemasDictionary {
+  getLatestVersionDictionary (): dictionaryEntities.SchemasDictionary | undefined {
     return this.latestVersionDictionary
   }
 

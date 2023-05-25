@@ -14,11 +14,7 @@
  * License.
  ****************************************************************************** */
 
-export class BadRequest extends Error {
-  errorCode: number
+import { RequestExeption } from './request.exception'
 
-  constructor (errorCode: number, message: string) {
-    super(message)
-    this.errorCode = errorCode
-  }
+export class BadRequestException extends RequestExeption {
 }

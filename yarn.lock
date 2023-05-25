@@ -1289,10 +1289,8 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@overturebio-stack/lectern-client@^1.4.0":
+"@overturebio-stack/lectern-client@file:../../../sandbox/set-aside/js-lectern-client-master":
   version "1.4.0"
-  resolved "https://registry.npmjs.org/@overturebio-stack/lectern-client/-/lectern-client-1.4.0.tgz"
-  integrity sha512-+T16UkGEOvAkt/QwfQwjO1C/kUzA71r9pjBfn/yymCBmpA5rabflMAYB8HjcVsCltoqamClMQiNAV1K+iaJOLA==
   dependencies:
     cd "^0.3.3"
     deep-freeze "^0.0.1"
@@ -3381,6 +3379,11 @@ http-errors@~1.6.3:
     inherits "2.0.3"
     setprototypeof "1.1.0"
     statuses ">= 1.4.0 < 2"
+
+http-status-codes@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/http-status-codes/-/http-status-codes-2.2.0.tgz#bb2efe63d941dfc2be18e15f703da525169622be"
+  integrity sha512-feERVo9iWxvnejp3SEfm/+oNG517npqL2/PIA8ORjyOZjGC7TwCRQsZylciLS64i6pJ0wRYz3rkXLRwbtFa8Ng==
 
 human-signals@^2.1.0:
   version "2.1.0"

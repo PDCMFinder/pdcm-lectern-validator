@@ -21,11 +21,11 @@ import {
 import { type SchemasDictionary } from '@overturebio-stack/lectern-client/lib/schema-entities'
 import FileProcessor from '../utils/fileProcessor'
 import * as dictionaryService from './dictionary.service'
-
 import { getLogger } from '@/utils/loggers'
 import {
-  type ProcessedFile, type SheetValidationResult, type ValidationReport, ValidationResultStatus
+  type ProcessedFile, type SheetValidationResult, type ValidationReport, ValidationResultStatus, type MutableSchemaValidationError
 } from '@/models/validation.model'
+import { ConfigurationException } from '@/exceptions/configuration.exception'
 
 const logger = getLogger('VALIDATOR_SERVICE')
 const fileProcessor = new FileProcessor()
@@ -36,7 +36,7 @@ class ValidatorService {
    * JSON schema (a dictionary in Lectern).
    */
   public async validateExcelFile (file: Express.Multer.File): Promise<ValidationReport> {
-    logger.info('Validating excel file')
+    logger.info('Validating excel file', file.originalname)
     const sheetsValidationResults: SheetValidationResult[] = []
 
     // Get an object with all the data from the Excel file
@@ -44,6 +44,10 @@ class ValidatorService {
 
     // Get the dictionary to use in the validations. Fetched from the Lectern instance.
     const validationDictionary = dictionaryService.instance().getLatestVersionDictionary()
+    if (validationDictionary == null) {
+      logger.error('No validation dictionary found')
+      throw new ConfigurationException('File could not be validated because a suitable dictionary to validate against was not found')
+    }
 
     processedFile.data.forEach((value, key) => {
       const sheetValidationResult: SheetValidationResult = this.#processSheet(key, value, validationDictionary)
@@ -69,11 +73,22 @@ class ValidatorService {
       ? ValidationResultStatus.INVALID
       : ValidationResultStatus.VALID
 
+    // SchemaValidationError is read only so we need to copy data to a structure without those restrictions
+    const validationErrors: MutableSchemaValidationError[] = validationResults.validationErrors.map(x =>
+      ({
+        errorType: x.errorType,
+        index: x.index,
+        fieldName: x.fieldName,
+        info: x.info,
+        message: x.message
+      })
+    )
+
     const sheetValidationResult: SheetValidationResult = {
       sheetName,
       schema: schemaName,
       status: sheetValidationStatus,
-      result: validationResults.validationErrors
+      result: validationErrors
     }
 
     return sheetValidationResult

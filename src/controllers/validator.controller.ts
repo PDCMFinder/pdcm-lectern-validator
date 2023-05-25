@@ -17,8 +17,8 @@
 import { type NextFunction, type Response } from 'express'
 import ValidatorService from '../services/validator.service'
 import { validateFileInRequest } from '@/services/request-validator.service'
-import { BadRequest } from '@/exceptions/bad-request.exception'
 import asyncHandler from 'express-async-handler'
+import { RequestExeption } from '@/exceptions/request.exception'
 
 const validatorService = new ValidatorService()
 
@@ -33,9 +33,9 @@ export const validateExcelData = asyncHandler(async (req: any, res: Response, ne
 
     res.status(201).send(validationReport)
   } catch (error) {
-    if (error instanceof BadRequest) {
+    if (error instanceof RequestExeption) {
       console.log(error.message)
-      res.status(error.errorCode).send(error.message)
+      res.status(error.statusCode).send(error.message)
     } else {
       console.error(error)
       res.status(500).send('error')
