@@ -1,4 +1,4 @@
-/*******************************************************************************
+/** *****************************************************************************
  * Copyright 2023 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the
@@ -12,34 +12,33 @@
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the
  * License.
- *******************************************************************************/
+ ****************************************************************************** */
 
-const asyncHandler = require('express-async-handler')
-
-import { NextFunction, Response } from "express";
+import { type NextFunction, type Response } from 'express'
 import ValidatorService from '../services/validator.service'
-import { validateRequest } from "@/services/request-validator.service";
-import { BadRequest } from "@/exceptions/bad-request.exception";
+import { validateFileInRequest } from '@/services/request-validator.service'
+import asyncHandler from 'express-async-handler'
+import { RequestExeption } from '@/exceptions/request.exception'
 
-const validatorService = new ValidatorService();
+const validatorService = new ValidatorService()
 
 /**
- * Reads the content of an Excel file from the request and validates its content against a 
+ * Reads the content of an Excel file from the request and validates its content against a
  * JSON schema (a dictionary in Lectern).
  */
 export const validateExcelData = asyncHandler(async (req: any, res: Response, next: NextFunction) => {
   try {
-    validateRequest(req);
-    const validationReport = await validatorService.validateExcelFile(req);
-    
-    res.status(201).send(validationReport);
+    const file: Express.Multer.File = validateFileInRequest(req)
+    const validationReport = await validatorService.validateExcelFile(file)
+
+    res.status(201).send(validationReport)
   } catch (error) {
-    if (error instanceof BadRequest) {
-      console.log(error.message);
-      res.status(error.errorCode).send(error.message);
+    if (error instanceof RequestExeption) {
+      console.log(error.message)
+      res.status(error.statusCode).send(error.message)
     } else {
-      console.error(error);
-      res.status(500).send('error');
+      console.error(error)
+      res.status(500).send('error')
     }
   }
-});
+})

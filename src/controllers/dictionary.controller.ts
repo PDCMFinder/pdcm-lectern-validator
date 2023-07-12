@@ -1,4 +1,4 @@
-/*******************************************************************************
+/** *****************************************************************************
  * Copyright 2023 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the
@@ -12,16 +12,13 @@
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the
  * License.
- *******************************************************************************/
+ ****************************************************************************** */
 
-import { NextFunction, Request, Response } from "express";
-import * as dictionaryService from '../services/dictionary.service';
+import { type NextFunction, type Request, type Response } from 'express'
+import * as dictionaryService from '../services/dictionary.service'
+import asyncHandler from 'express-async-handler'
 
-const asyncHandler = require('express-async-handler')
-
-
-exports.dictionary_get = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    const dictionary = dictionaryService.instance().getLatestVersionDictionary();
-    res.status(201).json(dictionary);
-  });
-  
+export const getDictionary = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  const dictionary = dictionaryService.instance().getLatestVersionDictionary()
+  res.status(201).json(dictionary)
+})

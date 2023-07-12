@@ -1,4 +1,4 @@
-/*******************************************************************************
+/** *****************************************************************************
  * Copyright 2023 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the
@@ -12,14 +12,14 @@
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the
  * License.
- *******************************************************************************/
+ ****************************************************************************** */
 
-import express from 'express';
-import { validateExcelData } from '@/controllers/validator.controller';
-import { uploadFile } from '@/utils/uploader';
+import express from 'express'
+import { validateExcelData } from '@/controllers/validator.controller'
+import { uploadFile } from '@/utils/uploader'
 
-const router = express.Router();
+const router = express.Router()
 
-router.post("/upload-excel", uploadFile("file"), validateExcelData);
+router.post('/upload-excel', uploadFile('file'), validateExcelData)
 
-export default router;
+export default router

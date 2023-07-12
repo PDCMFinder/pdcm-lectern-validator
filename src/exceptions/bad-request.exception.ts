@@ -1,4 +1,4 @@
-/*******************************************************************************
+/** *****************************************************************************
  * Copyright 2023 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the
@@ -12,12 +12,17 @@
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the
  * License.
- *******************************************************************************/
+ ****************************************************************************** */
 
-export class BadRequest extends Error {
-    errorCode: number;
-    constructor(errorCode: number, message: string) {
-      super(message);
-      this.errorCode = errorCode;
+import { StatusCodes } from 'http-status-codes'
+import { RequestExeption } from './request.exception'
+
+export class BadRequestException extends RequestExeption {
+  constructor (message: string, statusCode?: StatusCodes) {
+    if (statusCode) {
+      super(statusCode, message)
+    } else {
+      super(StatusCodes.BAD_REQUEST, message)
     }
   }
+}

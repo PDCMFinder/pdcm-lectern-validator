@@ -1,4 +1,4 @@
-/*******************************************************************************
+/** *****************************************************************************
  * Copyright 2023 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the
@@ -12,20 +12,16 @@
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the
  * License.
- *******************************************************************************/
+ ****************************************************************************** */
 
-import express from 'express';
-import { getLogger } from '@/utils/loggers';
+import express from 'express'
+import { getDictionary } from '../controllers/dictionary.controller'
 
-const dictionary_controller = require("../controllers/dictionary.controller");
-
-const router = express.Router();
-const logger = getLogger('DICTIONARY_ROUTE');
+const router = express.Router()
 
 /**
  * Gets a dictionary by name and version
  */
-router.get('/', dictionary_controller.dictionary_get);  
+router.get('/', getDictionary)
 
-
-export default router;
+export default router

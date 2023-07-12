@@ -14,8 +14,13 @@
  * License.
  ****************************************************************************** */
 
-export interface AppConfig {
-  dictionaryName: () => string
-  dictionaryVersion: () => string
-  dictionaryServiceUrl: () => string
+import { type StatusCodes } from 'http-status-codes'
+
+export class RequestExeption extends Error {
+  statusCode: StatusCodes
+
+  constructor (statusCode: StatusCodes, message: string) {
+    super(message)
+    this.statusCode = statusCode
+  }
 }

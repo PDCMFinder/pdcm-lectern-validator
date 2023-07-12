@@ -1,4 +1,4 @@
-/*******************************************************************************
+/** *****************************************************************************
  * Copyright 2023 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the
@@ -12,45 +12,52 @@
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the
  * License.
- *******************************************************************************/
+ ****************************************************************************** */
 
-import { ProcessedFile } from '@/models/validation.model';
-import { getLogger } from '@/utils/loggers';
-const XLSX = require("xlsx"); 
+import { type ProcessedFile } from '@/models/validation.model'
+import { getLogger } from '@/utils/loggers'
+import XLSX from 'xlsx'
 
-const logger = getLogger('fileProcessor');
+const logger = getLogger('fileProcessor')
 
 class FileProcessor {
-
-    /**
+  /**
      * Read one Excel file from the request. Transforms the data in a suitable format to be validated.
      * @param req Request that holds the Excel to process
      * @returns A ProcessedFile object with the sheets and rows as a dictionary.
      */
-    public async processExcelFile(req: any): Promise<ProcessedFile> {
-        const resultMap: Map<string, any> = new Map();
-        logger.warn("processExcelFile >> req.file:", req.file)
-        if (!req.file) {
-            throw new Error("No file uploaded");
-        }
-        const opts = {raw: false};
-       
-        const wb = XLSX.readFile(req.file.path);
-        const sheets = wb.SheetNames;
-        console.log('Sheets:', sheets);
-        sheets.forEach((sheet: any) => {
-            const data = XLSX.utils.sheet_to_json(wb.Sheets[sheet], opts);
-            resultMap.set(sheet, data);
-        });
+  public async processExcelFile (file: Express.Multer.File): Promise<ProcessedFile> {
+    const resultMap = new Map<string, any>()
+    const opts = { raw: false }
 
-        const processedFile: ProcessedFile = {
-            fileName: req.file.originalname,
-            data: resultMap
-        }
+    const wb = XLSX.readFile(file.path)
+    const sheets = wb.SheetNames
+    logger.info('Sheets:', sheets)
+    sheets.forEach((sheet: any) => {
+      const data = XLSX.utils.sheet_to_json(wb.Sheets[sheet], opts)
+      const dataWithoutComments = removeComments(data)
+      resultMap.set(sheet, dataWithoutComments)
+    })
 
-        return Promise.resolve(processedFile);
+    const processedFile: ProcessedFile = {
+      fileName: file.originalname,
+      data: resultMap
     }
+
+    return await Promise.resolve(processedFile)
+  }
 }
 
-export default FileProcessor;
+const removeComments = (data: any[]): any[] => {
+  return data.filter(record => !(shouldIgnoreRecord(record)))
+}
 
+const shouldIgnoreRecord = (record: any): boolean => {
+  if ('Field' in record) {
+    const valueAsString = record.Field as string
+    return valueAsString.startsWith('#')
+  }
+  return false
+}
+
+export default FileProcessor

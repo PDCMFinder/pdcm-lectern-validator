@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright 2023 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the
@@ -12,23 +12,23 @@
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the
  * License.
- *******************************************************************************/
+ */
 
-import multer, { StorageEngine } from 'multer';
-import uniqid from 'uniqid';
+import multer, { type StorageEngine } from 'multer'
+import uniqid from 'uniqid'
 
-import path from 'path';
-import { RequestHandler } from 'express';
+import path from 'path'
+import { type RequestHandler } from 'express'
 
 const storage: StorageEngine = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, '/tmp')
-    },
-    filename: function(req, file, cb) {
-        cb(null, Date.now() + uniqid() + path.extname(file.originalname))
-    }
-});
+  destination (req, file, cb) {
+    cb(null, '/tmp')
+  },
+  filename (req, file, cb) {
+    cb(null, `${Date.now()}${uniqid()}${path.extname(file.originalname)}`)
+  }
+})
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage })
 
-export const uploadFile: (field: string) => RequestHandler = (field) => upload.single(field);
+export const uploadFile: (field: string) => RequestHandler = (field) => upload.single(field)

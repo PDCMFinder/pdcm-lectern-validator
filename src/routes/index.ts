@@ -1,4 +1,4 @@
-/*******************************************************************************
+/** *****************************************************************************
  * Copyright 2023 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the
@@ -12,17 +12,15 @@
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the
  * License.
- *******************************************************************************/
+ ****************************************************************************** */
 
-import express from 'express';
-import { getLogger } from '@/utils/loggers';
+import express from 'express'
 
-const router = express.Router();
-const logger = getLogger('INDEX_ROUTE');
+const router = express.Router()
 
 /* GET home page. */
-router.get('/', function (_req, res, _next) {
-  res.render('index', { title: 'PDCM validator using Lectern' });
-});
+router.get('/', (_req, res, _next) => {
+  res.render('index', { title: 'PDCM validator using Lectern' })
+})
 
-export default router;
+export default router
