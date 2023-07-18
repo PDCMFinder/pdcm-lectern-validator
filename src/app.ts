@@ -40,6 +40,10 @@ class App {
     this.app.set('views', path.join(__dirname, 'views'))
     this.app.set('view engine', 'pug')
 
+    var cors = require('cors');
+    this.app.use(cors());
+    this.app.options('*', cors());
+
     this.app.use(logger('dev'))
     this.app.use(express.json())
     this.app.use(express.urlencoded({ extended: false }))
