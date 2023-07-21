@@ -23,6 +23,4 @@ spec:
         - name: DICTIONARY_VERSION
           value: '1.0'
         - name: DICTIONARY_NAME
-          value: simplest
-        - name: DICTIONARY_NAME
-          value: simplest
+          value: CancerModels_Dictionary
