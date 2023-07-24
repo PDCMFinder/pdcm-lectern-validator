@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pdcm-validator-deployment
+  namespace: pdcm-validator
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: pdcm-validator-deployment-access
+  namespace: pdcm-validator
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  verbs: [ "get", "list", "watch", "create", "update", "patch", "delete" ]
+- apiGroups:
+  - "apps"
+  resources:
+  - deployments
+  - replicasets
+  verbs: [ "get", "list", "watch", "create", "update", "patch", "delete" ]
+- apiGroups:
+  - "extensions"
+  resources:
+  - deployments
+  - replicasets
+  - ingresses
+  verbs: [ "get", "list", "watch", "create", "update", "patch", "delete" ]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: pdcm-validator-deployment-access-binding
+  namespace: pdcm-validator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pdcm-validator-deployment-access
+subjects:
+- kind: ServiceAccount
+  name: pdcm-validator-deployment
+  namespace: pdcm-validator

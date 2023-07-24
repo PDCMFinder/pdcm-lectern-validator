@@ -96,3 +96,55 @@ deploy-HH-WP-WEBADMIN-dev:
       fi
     - kubectl rollout status -f k8/dev/pdcm-lectern-validator/lectern-dev-deployment.yaml
     - kubectl get pods,service,deploy,replicaset,ing
+
+build_prod_image:
+  stage: build-prod
+  services:
+    - name: $CI_REGISTRY/mouse-informatics/dind:latest
+      alias: docker
+  before_script:
+    - sed -i "s|FROM node|FROM ${LOCAL_GITLAB_NODE_IMAGE}|g" Dockerfile
+    - mkdir -p "$MOUNT_POINT"
+    - echo "${CI_REGISTRY_PASSWORD}" | docker login -u "${CI_REGISTRY_USER}" --password-stdin  ${CI_REGISTRY}
+  script:
+    - |
+      if [[ "${REQUIRES_REBUILD_IMAGE}" == "true" ]]; then
+          echo "Building prod image: ${CI_REGISTRY_IMAGE}:prod" 
+          docker build -t "${CI_REGISTRY_IMAGE}":prod -f Dockerfile .  | tee ${MOUNT_POINT}/build.log
+          docker push "${CI_REGISTRY_IMAGE}":prod  | tee ${MOUNT_POINT}/push.log
+          docker logout ${CI_REGISTRY}
+          echo "Pushing to docker hub"
+          echo "${DOCKER_HUB_PWD}" | docker login --username "${DOCKER_HUB_USER}" --password-stdin
+          docker tag "${CI_REGISTRY_IMAGE}":dev "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":prod
+          docker push "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":prod  | tee ${MOUNT_POINT}/dockerhub-push-latest.log
+      fi
+    - docker logout
+
+  artifacts:
+    paths:
+      - "$MOUNT_POINT/"
+  only:
+    refs:
+      - main
+
+deploy-HH-WP-WEBADMIN-prod:
+  stage: deploy-prod
+  image: dtzar/helm-kubectl:2.13.0
+  script:
+    - kubectl config set-cluster local --server="${HH_WP_WEBADMIN_ENDPOINT}"
+    - kubectl config set clusters.local.certificate-authority-data "${HH_WP_WEBADMIN_CERTIFICATE_AUTHORITY}"
+    - kubectl config set-credentials ${HH_WP_WEBADMIN_PROD_USER} --token="${HH_WP_WEBADMIN_PROD_USER_TOKEN}"
+    - kubectl config set-context "${HH_WP_WEBADMIN_PROD_NAMESPACE}" --cluster=local --user=${HH_WP_WEBADMIN_PROD_USER} --namespace="${HH_WP_WEBADMIN_PROD_NAMESPACE}"
+    - kubectl config use-context "${HH_WP_WEBADMIN_PROD_NAMESPACE}"
+    - kubectl version
+
+    - |
+      if kubectl apply -f k8/prod/pdcm-lectern-validator/lectern-prod-deployment.yaml --record | grep -q unchanged; then
+          echo "=> Patching deployment to force image update."
+          kubectl patch -f k8/prod/pdcm-lectern-validator/lectern-prod-deployment.yaml --record -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"ci-last-updated\":\"$(date +'%s')\"}}}}}"
+      else
+        echo "=> Deployment apply has changed the object, no need to force image update."
+      fi
+    - kubectl rollout status -f k8/prod/pdcm-lectern-validator/lectern-prod-deployment.yaml
+    - kubectl get pods,service,deploy,replicaset,ing
+
