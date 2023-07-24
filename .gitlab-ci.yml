@@ -88,14 +88,18 @@ deploy-HH-WP-WEBADMIN-dev:
     - kubectl version
 
     - |
-      if kubectl apply -f k8/dev/pdcm-lectern-validator/lectern-dev-deployment.yaml --record | grep -q unchanged; then
+      if kubectl apply -f k8/dev/pdcm-lectern-validator/pdcm-lectern-validator-dev-deployment.yaml --record | grep -q unchanged; then
           echo "=> Patching deployment to force image update."
-          kubectl patch -f k8/dev/pdcm-lectern-validator/lectern-dev-deployment.yaml --record -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"ci-last-updated\":\"$(date +'%s')\"}}}}}"
+          kubectl patch -f k8/dev/pdcm-lectern-validator/pdcm-lectern-validator-dev-deployment.yaml --record -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"ci-last-updated\":\"$(date +'%s')\"}}}}}"
       else
         echo "=> Deployment apply has changed the object, no need to force image update."
       fi
-    - kubectl rollout status -f k8/dev/pdcm-lectern-validator/lectern-dev-deployment.yaml
+    - kubectl rollout status -f k8/dev/pdcm-lectern-validator/pdcm-lectern-validator-dev-deployment.yaml
     - kubectl get pods,service,deploy,replicaset,ing
+
+  only:
+    refs:
+      - develop
 
 build_prod_image:
   stage: build-prod
@@ -139,12 +143,16 @@ deploy-HH-WP-WEBADMIN-prod:
     - kubectl version
 
     - |
-      if kubectl apply -f k8/prod/pdcm-lectern-validator/lectern-prod-deployment.yaml --record | grep -q unchanged; then
+      if kubectl apply -f k8/prod/pdcm-lectern-validator/pdcm-lectern-validator-prod-deployment.yaml --record | grep -q unchanged; then
           echo "=> Patching deployment to force image update."
-          kubectl patch -f k8/prod/pdcm-lectern-validator/lectern-prod-deployment.yaml --record -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"ci-last-updated\":\"$(date +'%s')\"}}}}}"
+          kubectl patch -f k8/prod/pdcm-lectern-validator/pdcm-lectern-validator-prod-deployment.yaml --record -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"ci-last-updated\":\"$(date +'%s')\"}}}}}"
       else
         echo "=> Deployment apply has changed the object, no need to force image update."
       fi
-    - kubectl rollout status -f k8/prod/pdcm-lectern-validator/lectern-prod-deployment.yaml
+    - kubectl rollout status -f k8/prod/pdcm-lectern-validator/pdcm-lectern-validator-prod-deployment.yaml
     - kubectl get pods,service,deploy,replicaset,ing
+
+  only:
+    refs:
+      - main
 
