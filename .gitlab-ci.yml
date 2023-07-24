@@ -119,7 +119,7 @@ build_prod_image:
           docker logout ${CI_REGISTRY}
           echo "Pushing to docker hub"
           echo "${DOCKER_HUB_PWD}" | docker login --username "${DOCKER_HUB_USER}" --password-stdin
-          docker tag "${CI_REGISTRY_IMAGE}":dev "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":prod
+          docker tag "${CI_REGISTRY_IMAGE}":prod "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":prod
           docker push "${DOCKER_HUB_USER}"/"${DOCKER_HUB_REPO}":prod  | tee ${MOUNT_POINT}/dockerhub-push-latest.log
       fi
     - docker logout
