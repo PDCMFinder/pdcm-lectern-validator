@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mongo-db-dev
-  namespace: pdcm-validator-dev
+  name: mongo-db
+  namespace: pdcm-validator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mongo-db-dev
+      app: mongo-db
   template:
     metadata:
       labels:
-        app: mongo-db-dev
+        app: mongo-db
     spec:
       containers:
       - name: mongodb
@@ -25,9 +25,9 @@ spec:
               key: mongodb_root_password
         - name: MONGODB_USERNAME
           valueFrom:
-            configMapKeyRef:
-              name: database-conn
-              key: MONGODB_USERNAME
+              configMapKeyRef:
+                name: database-conn
+                key: MONGODB_USERNAME
         - name: MONGODB_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -35,9 +35,9 @@ spec:
               key: mongodb_password
         - name: MONGODB_DATABASE
           valueFrom:
-            configMapKeyRef:
-              name: database-conn
-              key: MONGODB_DATABASE
+              configMapKeyRef:
+                name: database-conn
+                key: MONGODB_DATABASE
         volumeMounts:
           - name: mongo-data-dir
             mountPath: /bitnami/mongodb
@@ -45,4 +45,4 @@ spec:
       volumes:
         - name: mongo-data-dir
           persistentVolumeClaim:
-            claimName: mongo-db-dev-pvc
+            claimName: mongo-db-pvc
