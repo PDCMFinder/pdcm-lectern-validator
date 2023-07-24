@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: pdcm-lectern-validator
+  name: pdcm-lectern-validator-svc
+  namespace: pdcm-validator
+spec:
+  ports:
+  - port: 3009
+    protocol: TCP
+    targetPort: 3009
+    nodePort: 31683
+  selector:
+    app: pdcm-lectern-validator
+  type: NodePort
+status:
+  loadBalancer: {}
