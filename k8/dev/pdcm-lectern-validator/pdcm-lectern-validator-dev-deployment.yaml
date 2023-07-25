@@ -24,3 +24,5 @@ spec:
           value: '1.0'
         - name: DICTIONARY_NAME
           value: CancerModels_Dictionary
+        - name: PORT
+          value: 3009
