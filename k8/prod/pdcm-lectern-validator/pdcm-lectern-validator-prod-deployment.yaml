@@ -27,4 +27,4 @@ spec:
         - name: PORT
           value: '3009'
         - name: BASE_URL
-          value: '/api/validation'
+          value: '/validation/api'
