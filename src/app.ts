@@ -52,9 +52,10 @@ class App {
   }
 
   private routerSetup (): void {
-    this.app.use('/', indexRouter)
-    this.app.use(['/dictionary', '*/dictionary'], dictionaryRouter)
-    this.app.use(['/validation', '*/validation'], validatorRouter)
+    const baseUrl = process.env.BASE_URL || ''
+    this.app.use(baseUrl + '/dictionary', dictionaryRouter)
+    this.app.use(baseUrl + '/validation', validatorRouter)
+    this.app.use(baseUrl + '/', indexRouter)
   }
 
   private errorHandler (): void {

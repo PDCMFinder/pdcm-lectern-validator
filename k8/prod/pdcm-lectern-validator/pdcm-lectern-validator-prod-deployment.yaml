@@ -26,3 +26,5 @@ spec:
           value: CancerModels_Dictionary
         - name: PORT
           value: '3009'
+        - name: BASE_URL
+          value: '/api/validation'
