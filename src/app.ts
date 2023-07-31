@@ -53,8 +53,8 @@ class App {
 
   private routerSetup (): void {
     this.app.use('/', indexRouter)
-    this.app.use('/validation', validatorRouter)
-    this.app.use('/dictionary', dictionaryRouter)
+    this.app.use(['/dictionary', '*/dictionary'], dictionaryRouter)
+    this.app.use(['/validation', '*/validation'], validatorRouter)
   }
 
   private errorHandler (): void {
