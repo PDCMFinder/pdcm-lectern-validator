@@ -14,7 +14,7 @@
  * License.
  ****************************************************************************** */
 
-import { type SchemaValidationError } from '@overturebio-stack/lectern-client/lib/schema-entities'
+import { type SchemaValidationError } from '@overturebio-stack/lectern-client/lib/schema-entities';
 
 export enum ValidationResultStatus {
   VALID = 'valid',
@@ -29,7 +29,7 @@ export interface ProcessedFile {
 
 export type MutableSchemaValidationError = {
   -readonly [Value in keyof SchemaValidationError]: SchemaValidationError[Value];
-}
+};
 
 export interface SheetValidationResult {
   sheetName: string

@@ -14,14 +14,14 @@
  * License.
  ****************************************************************************** */
 
-import express from 'express'
-import { getDictionary } from '../controllers/dictionary.controller'
+import express from 'express';
+import { getDictionary } from '../controllers/dictionary.controller';
 
-const router = express.Router()
+const router = express.Router();
 
 /**
  * Gets a dictionary by name and version
  */
-router.get('/', getDictionary)
+router.get('/', getDictionary);
 
-export default router
+export default router;

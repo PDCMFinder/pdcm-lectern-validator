@@ -14,13 +14,13 @@
  * License.
  ****************************************************************************** */
 
-import { type NextFunction, type Response } from 'express'
-import ValidatorService from '../services/validator.service'
-import { validateFileInRequest } from '@/services/request-validator.service'
-import asyncHandler from 'express-async-handler'
-import { RequestExeption } from '@/exceptions/request.exception'
+import { type NextFunction, type Response } from 'express';
+import ValidatorService from '../services/validator.service';
+import { validateFileInRequest } from '@/services/request-validator.service';
+import asyncHandler from 'express-async-handler';
+import { RequestExeption } from '@/exceptions/request.exception';
 
-const validatorService = new ValidatorService()
+const validatorService = new ValidatorService();
 
 /**
  * Reads the content of an Excel file from the request and validates its content against a
@@ -28,17 +28,17 @@ const validatorService = new ValidatorService()
  */
 export const validateExcelData = asyncHandler(async (req: any, res: Response, next: NextFunction) => {
   try {
-    const file: Express.Multer.File = validateFileInRequest(req)
-    const validationReport = await validatorService.validateExcelFile(file)
+    const file: Express.Multer.File = validateFileInRequest(req);
+    const validationReport = await validatorService.validateExcelFile(file);
 
-    res.status(201).send(validationReport)
+    res.status(201).send(validationReport);
   } catch (error) {
     if (error instanceof RequestExeption) {
-      console.log(error.message)
-      res.status(error.statusCode).send(error.message)
+      console.log(error.message);
+      res.status(error.statusCode).send(error.message);
     } else {
-      console.error(error)
-      res.status(500).send('error')
+      console.error(error);
+      res.status(500).send('error');
     }
   }
-})
+});

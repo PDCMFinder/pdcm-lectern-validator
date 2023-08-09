@@ -17,23 +17,25 @@
 import {
   type entities as dictionaryEntities,
   restClient as dictionaryRestClient
-} from '@overturebio-stack/lectern-client'
+} from '@overturebio-stack/lectern-client';
 
-import { getLogger } from '@/utils/loggers'
-import { ConfigurationException } from '@/exceptions/configuration.exception'
+import { getLogger } from '@/utils/loggers';
+import { ConfigurationException } from '@/exceptions/configuration.exception';
 
-const logger = getLogger('DICTIONARY_SERVICE')
+const logger = getLogger('DICTIONARY_SERVICE');
 
-let dictionaryService: DictionaryService
+let dictionaryService: DictionaryService;
 
-class DictionaryService {
-  private latestVersionDictionary: dictionaryEntities.SchemasDictionary | undefined = undefined
+export class DictionaryService {
+  private latestVersionDictionary: dictionaryEntities.SchemasDictionary | undefined = undefined;
 
-  private validationDictionaryName = ''
+  private validationDictionaryName = '';
 
-  private validationDictionaryVersion = ''
+  private validationDictionaryVersion = '';
 
   constructor (private readonly dictionaryServiceUrl: string) { }
+
+  getDictionaryServiceUrl = () => this.dictionaryServiceUrl;
 
   /**
    * Fetches a specific dictionary from Lectern. This version will (usually the lastest) will be the one
@@ -43,19 +45,19 @@ class DictionaryService {
    */
   loadValidationDictionary = async (name: string, version: string): Promise<dictionaryEntities.SchemasDictionary> => {
     try {
-      logger.info(`Fetching validation dictionary. Name: ${name} - Version: ${version}`)
-      const validationDictionary = await dictionaryRestClient.fetchSchema(this.dictionaryServiceUrl, name, version)
-      logger.info('Dictionary fetched successfully')
-      this.latestVersionDictionary = validationDictionary
+      logger.info(`Fetching validation dictionary. Name: ${name} - Version: ${version}`);
+      const validationDictionary = await dictionaryRestClient.fetchSchema(this.dictionaryServiceUrl, name, version);
+      logger.info('Dictionary fetched successfully');
+      this.latestVersionDictionary = validationDictionary;
       // Sets the version used for reference
-      this.setValidationDictionaryInformation(name, version)
-      return validationDictionary
+      this.setValidationDictionaryInformation(name, version);
+      return validationDictionary;
     } catch (err) {
-      let errorMessage = `Could not fetch dictionary from ${this.dictionaryServiceUrl}.`
-      errorMessage += ` Check that Lectern is running and that a dictionary named [${name}] with version ${version} exists.`
-      throw new ConfigurationException(errorMessage)
+      let errorMessage = `Could not fetch dictionary from ${this.dictionaryServiceUrl}.`;
+      errorMessage += ` Check that Lectern is running and that a dictionary named [${name}] with version ${version} exists.`;
+      throw new ConfigurationException(errorMessage);
     }
-  }
+  };
 
   loadSchemaByVersion = async (
     name: string,
@@ -66,43 +68,43 @@ class DictionaryService {
         this.dictionaryServiceUrl,
         name,
         version
-      )
-      logger.info('Schema loaded...')
-      logger.info(newSchema)
-      this.latestVersionDictionary = newSchema
-      return newSchema
+      );
+      logger.info('Schema loaded...');
+      logger.info(newSchema);
+      this.latestVersionDictionary = newSchema;
+      return newSchema;
     } catch (err) {
-      logger.error('Failed to fetch schema: ', err)
-      throw new Error(`Failed to fetch schema: ${err as string}`)
+      logger.error('Failed to fetch schema: ', err);
+      throw new Error(`Failed to fetch schema: ${err as string}`);
     }
-  }
+  };
 
   setValidationDictionaryInformation (dictionaryName: string, dictionaryVersion: string): void {
-    this.validationDictionaryName = dictionaryName
-    this.validationDictionaryVersion = dictionaryVersion
+    this.validationDictionaryName = dictionaryName;
+    this.validationDictionaryVersion = dictionaryVersion;
   }
 
   getLatestVersionDictionary (): dictionaryEntities.SchemasDictionary | undefined {
-    return this.latestVersionDictionary
+    return this.latestVersionDictionary;
   }
 
   getValidationDictionaryName (): string {
-    return this.validationDictionaryName
+    return this.validationDictionaryName;
   }
 
   getValidationDictionaryVersion (): string {
-    return this.validationDictionaryVersion
+    return this.validationDictionaryVersion;
   }
 }
 
 export function instance (): DictionaryService {
   if (dictionaryService === undefined) {
-    throw new Error('Validator Service not initialized, you should call create first')
+    throw new Error('Validator Service not initialized, you should call create first');
   }
-  return dictionaryService
+  return dictionaryService;
 }
 
 export function create (schemaServiceUrl: string): void {
-  logger.info('Creating service with url', schemaServiceUrl)
-  dictionaryService = new DictionaryService(schemaServiceUrl)
+  logger.info('Creating service with url', schemaServiceUrl);
+  dictionaryService = new DictionaryService(schemaServiceUrl);
 }

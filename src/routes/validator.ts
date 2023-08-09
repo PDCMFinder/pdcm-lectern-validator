@@ -14,12 +14,12 @@
  * License.
  ****************************************************************************** */
 
-import express from 'express'
-import { validateExcelData } from '@/controllers/validator.controller'
-import { uploadFile } from '@/utils/uploader'
+import express from 'express';
+import { validateExcelData } from '@/controllers/validator.controller';
+import { uploadFile } from '@/utils/uploader';
 
-const router = express.Router()
+const router = express.Router();
 
-router.post('/upload-excel', uploadFile('file'), validateExcelData)
+router.post('/upload-excel', uploadFile('file'), validateExcelData);
 
-export default router
+export default router;

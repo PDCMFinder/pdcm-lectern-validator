@@ -14,21 +14,21 @@
  * License.
  */
 
-import multer, { type StorageEngine } from 'multer'
-import uniqid from 'uniqid'
+import multer, { type StorageEngine } from 'multer';
+import uniqid from 'uniqid';
 
-import path from 'path'
-import { type RequestHandler } from 'express'
+import path from 'path';
+import { type RequestHandler } from 'express';
 
 const storage: StorageEngine = multer.diskStorage({
   destination (req, file, cb) {
-    cb(null, '/tmp')
+    cb(null, '/tmp');
   },
   filename (req, file, cb) {
-    cb(null, `${Date.now()}${uniqid()}${path.extname(file.originalname)}`)
+    cb(null, `${Date.now()}${uniqid()}${path.extname(file.originalname)}`);
   }
-})
+});
 
-const upload = multer({ storage })
+const upload = multer({ storage });
 
-export const uploadFile: (field: string) => RequestHandler = (field) => upload.single(field)
+export const uploadFile: (field: string) => RequestHandler = (field) => upload.single(field);

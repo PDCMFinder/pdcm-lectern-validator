@@ -16,20 +16,20 @@
 
 import {
   functions as lecternSchemaFunctions
-} from '@overturebio-stack/lectern-client'
+} from '@overturebio-stack/lectern-client';
 
-import { type SchemasDictionary } from '@overturebio-stack/lectern-client/lib/schema-entities'
-import FileProcessor from '../utils/fileProcessor'
-import * as dictionaryService from './dictionary.service'
-import { getLogger } from '@/utils/loggers'
+import { type SchemasDictionary } from '@overturebio-stack/lectern-client/lib/schema-entities';
+import FileProcessor from '../utils/fileProcessor';
+import * as dictionaryService from './dictionary.service';
+import { getLogger } from '@/utils/loggers';
 import {
   type ProcessedFile, type SheetValidationResult, type ValidationReport, ValidationResultStatus, type MutableSchemaValidationError
-} from '@/models/validation.model'
-import { ConfigurationException } from '@/exceptions/configuration.exception'
-import { BadRequestException } from '@/exceptions/bad-request.exception'
+} from '@/models/validation.model';
+import { ConfigurationException } from '@/exceptions/configuration.exception';
+import { BadRequestException } from '@/exceptions/bad-request.exception';
 
-const logger = getLogger('VALIDATOR_SERVICE')
-const fileProcessor = new FileProcessor()
+const logger = getLogger('VALIDATOR_SERVICE');
+const fileProcessor = new FileProcessor();
 
 class ValidatorService {
   /**
@@ -37,43 +37,43 @@ class ValidatorService {
    * JSON schema (a dictionary in Lectern).
    */
   public async validateExcelFile (file: Express.Multer.File): Promise<ValidationReport> {
-    logger.info('Validating excel file', file.originalname)
-    const sheetsValidationResults: SheetValidationResult[] = []
+    logger.info('Validating excel file', file.originalname);
+    const sheetsValidationResults: SheetValidationResult[] = [];
 
     // Get an object with all the data from the Excel file
-    const processedFile: ProcessedFile = await fileProcessor.processExcelFile(file)
+    const processedFile: ProcessedFile = await fileProcessor.processExcelFile(file);
 
     // Get the dictionary to use in the validations. Fetched from the Lectern instance.
-    const validationDictionary = dictionaryService.instance().getLatestVersionDictionary()
+    const validationDictionary = dictionaryService.instance().getLatestVersionDictionary();
     if (validationDictionary == null) {
-      logger.error('No validation dictionary found')
-      throw new ConfigurationException('File could not be validated because a suitable dictionary to validate against was not found')
+      logger.error('No validation dictionary found');
+      throw new ConfigurationException('File could not be validated because a suitable dictionary to validate against was not found');
     }
 
     processedFile.data.forEach((value, key) => {
-      const sheetValidationResult: SheetValidationResult = this.#processSheet(key, value, validationDictionary)
-      sheetsValidationResults.push(sheetValidationResult)
-    })
+      const sheetValidationResult: SheetValidationResult = this.#processSheet(key, value, validationDictionary);
+      sheetsValidationResults.push(sheetValidationResult);
+    });
 
-    const validationReport: ValidationReport = this.#buildReport(processedFile.fileName, validationDictionary.name, validationDictionary.version, sheetsValidationResults)
+    const validationReport: ValidationReport = this.#buildReport(processedFile.fileName, validationDictionary.name, validationDictionary.version, sheetsValidationResults);
 
-    return await Promise.resolve(validationReport)
+    return await Promise.resolve(validationReport);
   }
 
   #processSheet (schemaName: string, records: Map<string, any>, dictionary: SchemasDictionary): SheetValidationResult {
     const sheetValidationResult: SheetValidationResult = {
       sheetName: schemaName
-    }
+    };
 
-    const sheetRows: any[] = [...records.values()]
+    const sheetRows: any[] = [...records.values()];
 
     try {
       // Call the lectern validator
-      const validationResults = lecternSchemaFunctions.processRecords(dictionary, schemaName, sheetRows)
+      const validationResults = lecternSchemaFunctions.processRecords(dictionary, schemaName, sheetRows);
 
       const sheetValidationStatus = validationResults.validationErrors.length > 0
         ? ValidationResultStatus.INVALID
-        : ValidationResultStatus.VALID
+        : ValidationResultStatus.VALID;
 
       // SchemaValidationError is read only so we need to copy data to a structure without those restrictions
       const validationErrors: MutableSchemaValidationError[] = validationResults.validationErrors.map((x: any) =>
@@ -84,20 +84,20 @@ class ValidatorService {
           info: x.info,
           message: x.message
         })
-      )
+      );
 
-      sheetValidationResult.status = sheetValidationStatus
-      sheetValidationResult.result = validationErrors
+      sheetValidationResult.status = sheetValidationStatus;
+      sheetValidationResult.result = validationErrors;
     } catch (error) {
-      throw new BadRequestException(error as string)
+      throw new BadRequestException(error as string);
     }
 
-    return sheetValidationResult
+    return sheetValidationResult;
   }
 
   getSchemaNameFromFileName (fileName: string): string {
-    const idx = fileName.indexOf('.')
-    return fileName.slice(0, idx)
+    const idx = fileName.indexOf('.');
+    return fileName.slice(0, idx);
   }
 
   #buildReport (
@@ -106,7 +106,7 @@ class ValidatorService {
     dictionaryVersion: string,
     sheetsValidationResults: SheetValidationResult[]
   ): ValidationReport {
-    const reportStatus = this.#getUnifiedStatus(sheetsValidationResults)
+    const reportStatus = this.#getUnifiedStatus(sheetsValidationResults);
 
     const validationReport: ValidationReport = {
       date: new Date(),
@@ -115,16 +115,16 @@ class ValidatorService {
       dictionaryName,
       dictionaryVersion,
       sheetsValidationResults
-    }
+    };
 
-    return validationReport
+    return validationReport;
   }
 
   #getUnifiedStatus (sheetsValidationResults: SheetValidationResult[]): ValidationResultStatus {
     const anyInvalid: boolean = sheetsValidationResults
-      .some((x) => x.status !== ValidationResultStatus.VALID)
-    return anyInvalid ? ValidationResultStatus.INVALID : ValidationResultStatus.VALID
+      .some((x) => x.status !== ValidationResultStatus.VALID);
+    return anyInvalid ? ValidationResultStatus.INVALID : ValidationResultStatus.VALID;
   }
 }
 
-export default ValidatorService
+export default ValidatorService;
