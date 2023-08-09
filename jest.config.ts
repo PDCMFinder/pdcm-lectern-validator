@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     preset: 'ts-jest',
     testEnvironment: 'node',
     roots: ['<rootDir>/tests'],
@@ -12,5 +12,8 @@ module.exports = {
     },
     modulePaths: [
       "<rootDir>"
-    ],
+  ],
+  coveragePathIgnorePatterns: [
+    "/node_modules/"
+  ]
   };
