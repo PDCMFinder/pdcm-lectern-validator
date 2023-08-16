@@ -28,7 +28,6 @@
     "http-errors": "~1.6.3",
     "http-status-codes": "^2.2.0",
     "lodash": "^4.17.21",
-    "log4js": "latest",
     "mock-http-server": "^1.4.5",
     "module-alias": "^2.2.2",
     "morgan": "~1.9.1",
@@ -38,6 +37,7 @@
     "pug": "^3.0.2",
     "rimraf": "^3.0.2",
     "uniqid": "^5.4.0",
+    "winston": "^3.10.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
@@ -46,6 +46,7 @@
     "@tsconfig/recommended": "^1.0.0",
     "@types/chai": "^4.3.5",
     "@types/cookie-parser": "^1.4.2",
+    "@types/cors": "^2.8.13",
     "@types/debug": "^4.1.7",
     "@types/expect": "^24.3.0",
     "@types/express": "^4.17.13",

@@ -14,8 +14,8 @@
  * License.
  ****************************************************************************** */
 
+import getLogger from '@/lib/logger';
 import { type ProcessedFile } from '@/models/validation.model';
-import { getLogger } from '@/utils/loggers';
 import XLSX from 'xlsx';
 
 const logger = getLogger('fileProcessor');

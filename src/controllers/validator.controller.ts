@@ -20,7 +20,9 @@ import { validateFileInRequest } from '@/services/request-validator.service';
 import asyncHandler from 'express-async-handler';
 import { RequestExeption } from '@/exceptions/request.exception';
 import { ConfigurationException } from '@/exceptions/configuration.exception';
+import getLogger from '@/lib/logger';
 
+const logger = getLogger('VALIDATOR_CONTROLLER');
 const validatorService = new ValidatorService();
 
 /**
@@ -35,18 +37,16 @@ export const validateExcelData = asyncHandler(async (req: any, res: Response, ne
     res.status(201).send(validationReport);
   } catch (error) {
     if (error instanceof RequestExeption) {
-      console.error('RequestExeption:', error.message);
+      logger.error('RequestExeption:', error.message);
       res.status(error.statusCode).send(error.message);
-    }
-    else if (error instanceof ConfigurationException) {
-      console.error('ConfigurationException:', error.message);
+    } else if (error instanceof ConfigurationException) {
+      logger.error('ConfigurationException:', error.message);
       res.status(500).send(error.message);
-    }
-    else if (error instanceof Error) {
-      console.error('Error:', error.message);
+    } else if (error instanceof Error) {
+      logger.error('Error:', error.message);
       res.status(500).send(error.message);
     } else {
-      console.error(error);
+      logger.error(error);
       res.status(500).send('Server error');
     }
   }

@@ -20,6 +20,7 @@ import express, { type RequestHandler, type ErrorRequestHandler } from 'express'
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
+import cors from 'cors';
 
 import indexRouter from './routes/index';
 import validatorRouter from './routes/validator';
@@ -40,7 +41,6 @@ class App {
     this.app.set('views', path.join(__dirname, 'views'));
     this.app.set('view engine', 'pug');
 
-    const cors = require('cors');
     this.app.use(cors());
     this.app.options('*', cors());
 
@@ -52,7 +52,7 @@ class App {
   }
 
   private routerSetup (): void {
-    const baseUrl = process.env.BASE_URL || '';
+    const baseUrl = process.env.BASE_URL ?? '';
     this.app.use(baseUrl + '/dictionary', dictionaryRouter);
     this.app.use(baseUrl + '/validation', validatorRouter);
     this.app.use(baseUrl + '/', indexRouter);

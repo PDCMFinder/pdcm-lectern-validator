@@ -19,8 +19,8 @@ import {
   restClient as dictionaryRestClient
 } from '@overturebio-stack/lectern-client';
 
-import { getLogger } from '@/utils/loggers';
 import { ConfigurationException } from '@/exceptions/configuration.exception';
+import getLogger from '@/lib/logger';
 
 const logger = getLogger('DICTIONARY_SERVICE');
 
@@ -34,8 +34,6 @@ export class DictionaryService {
   private validationDictionaryVersion = '';
 
   constructor (private readonly dictionaryServiceUrl: string) { }
-
-  getDictionaryServiceUrl = () => this.dictionaryServiceUrl;
 
   /**
    * Fetches a specific dictionary from Lectern. This version will (usually the lastest) will be the one

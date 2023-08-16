@@ -14,9 +14,9 @@
  * License.
  ****************************************************************************** */
 
-import { getLogger } from '@/utils/loggers';
 import * as dictionaryService from './services/dictionary.service';
 import { type AppConfig } from './config';
+import getLogger from './lib/logger';
 
 const logger = getLogger('BOOTSTRAP');
 
