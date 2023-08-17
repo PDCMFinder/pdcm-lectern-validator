@@ -16,7 +16,7 @@
 
 import createError from 'http-errors';
 
-import express, { type RequestHandler, type ErrorRequestHandler } from 'express';
+import express, { type RequestHandler, type ErrorRequestHandler, Request, Response, NextFunction } from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
@@ -25,18 +25,22 @@ import cors from 'cors';
 import indexRouter from './routes/index';
 import validatorRouter from './routes/validator';
 import dictionaryRouter from './routes/dictionary';
+import { errorHandler } from './exceptions/ErrorHandler';
+import getLogger from './lib/logger';
+
+const log = getLogger('app');
 
 class App {
   public app: express.Application;
 
-  constructor () {
+  constructor() {
     this.app = express();
     this.config();
     this.routerSetup();
     this.errorHandler();
   }
 
-  private config (): void {
+  private config(): void {
     // view engine setup
     this.app.set('views', path.join(__dirname, 'views'));
     this.app.set('view engine', 'pug');
@@ -51,37 +55,24 @@ class App {
     this.app.use(express.static(path.join(__dirname, 'public')));
   }
 
-  private routerSetup (): void {
+  private routerSetup(): void {
     const baseUrl = process.env.BASE_URL ?? '';
     this.app.use(baseUrl + '/dictionary', dictionaryRouter);
     this.app.use(baseUrl + '/validation', validatorRouter);
     this.app.use(baseUrl + '/', indexRouter);
   }
 
-  private errorHandler (): void {
-    // catch 404 and forward to error handler
-    const requestHandler: RequestHandler = function (_req, _res, next) {
-      next(createError(404));
-    };
-    this.app.use(requestHandler);
+  private errorHandler(): void {
+    this.app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
+      log.error(err.message || err)
+      next(err);
+    });
 
-    // error handler
-    const errorRequestHandler: ErrorRequestHandler = function (
-      err,
-      req,
-      res,
-      _next
-    ): void {
-      // set locals, only providing error in development
-      res.locals.message = err.message;
-      res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-      // render the error page
-      res.status(err.status !== undefined ? err.status : 500);
-      res.render('error');
-    };
-    this.app.use(errorRequestHandler);
+    this.app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+      errorHandler.handleError(err, res);
+    });
   }
+
 }
 
 export default new App().app;

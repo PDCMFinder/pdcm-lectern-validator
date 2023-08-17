@@ -53,7 +53,7 @@ describe('DictionaryService', () => {
         mockedDictionaryRestClient.fetchSchema.mockRejectedValue(errorMessage);
 
         const expectedErrorMessage = `Could not fetch dictionary from ${dictionaryServiceUrl}.`
-            + ` Check that Lectern is running and that a dictionary named [CancerModels_Dictionary] with version 1.0 exists.`;
+            + ` Check that Lectern is running.`;
 
         await expect(
             dictionaryService.loadValidationDictionary(dictionaryName, dictionaryVersion)

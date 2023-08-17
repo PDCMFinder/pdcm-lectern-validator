@@ -57,8 +57,8 @@ export class DictionaryService {
     } catch (error) {
       if (error instanceof ConfigurationException) {
         throw error;
-      }      
-      let errorMessage = `Could not fetch dictionary from ${this.dictionaryServiceUrl}. Check that Lectern is running.`;
+      }
+      const errorMessage = `Could not fetch dictionary from ${this.dictionaryServiceUrl}. Check that Lectern is running.`;
       throw new ConfigurationException(errorMessage);
     }
   };
@@ -79,7 +79,7 @@ export class DictionaryService {
       return newSchema;
     } catch (err) {
       logger.error('Failed to fetch schema: ', err);
-      throw new Error(`Failed to fetch schema: ${err as string}`);
+      throw new ConfigurationException(`Failed to fetch schema: ${err as string}`);
     }
   };
 
@@ -103,7 +103,7 @@ export class DictionaryService {
 
 export function instance (): DictionaryService {
   if (dictionaryService === undefined) {
-    throw new Error('Validator Service not initialized, you should call create first');
+    throw new ConfigurationException('Validator Service not initialized, you should call create first.');
   }
   return dictionaryService;
 }

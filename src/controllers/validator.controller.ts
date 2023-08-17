@@ -18,12 +18,25 @@ import { type NextFunction, type Response } from 'express';
 import ValidatorService from '../services/validator.service';
 import { validateFileInRequest } from '@/services/request-validator.service';
 import asyncHandler from 'express-async-handler';
-import { RequestExeption } from '@/exceptions/request.exception';
 import { ConfigurationException } from '@/exceptions/configuration.exception';
 import getLogger from '@/lib/logger';
+import { BadRequestException } from '@/exceptions/bad-request.exception';
+import { AppError } from '@/exceptions/AppError';
+import { BadRequestApiError } from '@/exceptions/bad-request-api-error';
+import { ServerConfigurationAppError } from '@/exceptions/server-configuration-api-error';
 
-const logger = getLogger('VALIDATOR_CONTROLLER');
 const validatorService = new ValidatorService();
+
+const handleApiError = (error: Error | AppError, res: Response): void => {
+  if (error instanceof BadRequestException) {
+    throw new BadRequestApiError(error.message, error.statusCode);
+  } else if (error instanceof ConfigurationException) {
+    throw new ServerConfigurationAppError(error.message);
+  }
+  else {
+    throw error;
+  }
+}
 
 /**
  * Reads the content of an Excel file from the request and validates its content against a
@@ -35,19 +48,7 @@ export const validateExcelData = asyncHandler(async (req: any, res: Response, ne
     const validationReport = await validatorService.validateExcelFile(file);
 
     res.status(201).send(validationReport);
-  } catch (error) {
-    if (error instanceof RequestExeption) {
-      logger.error('RequestExeption:', error.message);
-      res.status(error.statusCode).send(error.message);
-    } else if (error instanceof ConfigurationException) {
-      logger.error('ConfigurationException:', error.message);
-      res.status(500).send(error.message);
-    } else if (error instanceof Error) {
-      logger.error('Error:', error.message);
-      res.status(500).send(error.message);
-    } else {
-      logger.error(error);
-      res.status(500).send('Server error');
-    }
+  } catch (error: any) {
+    handleApiError(error, req)
   }
 });

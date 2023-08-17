@@ -37,8 +37,8 @@ class ValidatorService {
    * Reads the content of an Excel file from the request and validates its content against a
    * JSON schema (a dictionary in Lectern).
    */
-  public async validateExcelFile (file: Express.Multer.File): Promise<ValidationReport> {
-    logger.info('Validating excel file', file.originalname);
+  public async validateExcelFile(file: Express.Multer.File): Promise<ValidationReport> {
+    logger.info(`Validating excel file ${file.originalname}`);
     const sheetsValidationResults: SheetValidationResult[] = [];
 
     // Get an object with all the data from the Excel file
@@ -48,10 +48,10 @@ class ValidatorService {
     const validationDictionary = dictionaryService.instance().getLatestVersionDictionary();
     if (validationDictionary == null) {
       logger.error('No validation dictionary found');
-      throw new ConfigurationException('File could not be validated because a suitable dictionary to validate against was not found');
+      throw new ConfigurationException('File could not be validated because a suitable dictionary to validate against was not found.');
     }
-    // Inactive for now
-    // this.#validateSchemasAndSheetsMatch(validationDictionary, processedFile);
+
+    this.#validateSchemasAndSheetsMatch(validationDictionary, processedFile);
 
     processedFile.data.forEach((value, key) => {
       const sheetValidationResult: SheetValidationResult = this.#processSheet(key, value, validationDictionary);
@@ -61,9 +61,10 @@ class ValidatorService {
     const validationReport: ValidationReport = this.#buildReport(processedFile.fileName, validationDictionary.name, validationDictionary.version, sheetsValidationResults);
 
     return await Promise.resolve(validationReport);
+
   }
 
-  #processSheet (schemaName: string, records: Map<string, any>, dictionary: SchemasDictionary): SheetValidationResult {
+  #processSheet(schemaName: string, records: Map<string, any>, dictionary: SchemasDictionary): SheetValidationResult {
     const sheetValidationResult: SheetValidationResult = {
       sheetName: schemaName
     };
@@ -80,13 +81,13 @@ class ValidatorService {
 
       // SchemaValidationError is read only so we need to copy data to a structure without those restrictions
       const validationErrors: MutableSchemaValidationError[] = validationResults.validationErrors.map((x: any) =>
-        ({
-          errorType: x.errorType,
-          index: x.index,
-          fieldName: x.fieldName,
-          info: x.info,
-          message: x.message
-        })
+      ({
+        errorType: x.errorType,
+        index: x.index,
+        fieldName: x.fieldName,
+        info: x.info,
+        message: x.message
+      })
       );
 
       sheetValidationResult.status = sheetValidationStatus;
@@ -98,12 +99,12 @@ class ValidatorService {
     return sheetValidationResult;
   }
 
-  getSchemaNameFromFileName (fileName: string): string {
+  getSchemaNameFromFileName(fileName: string): string {
     const idx = fileName.indexOf('.');
     return fileName.slice(0, idx);
   }
 
-  #buildReport (
+  #buildReport(
     fileName: string,
     dictionaryName: string,
     dictionaryVersion: string,
@@ -123,21 +124,21 @@ class ValidatorService {
     return validationReport;
   }
 
-  #getUnifiedStatus (sheetsValidationResults: SheetValidationResult[]): ValidationResultStatus {
+  #getUnifiedStatus(sheetsValidationResults: SheetValidationResult[]): ValidationResultStatus {
     const anyInvalid: boolean = sheetsValidationResults
       .some((x) => x.status !== ValidationResultStatus.VALID);
     return anyInvalid ? ValidationResultStatus.INVALID : ValidationResultStatus.VALID;
   }
 
-  #validateSchemasAndSheetsMatch (dictionary: SchemasDictionary, processedFile: ProcessedFile): void {
+  #validateSchemasAndSheetsMatch(dictionary: SchemasDictionary, processedFile: ProcessedFile): void {
     const schemas = dictionary.schemas.map(e => e.name);
     const sheets = Array.from(processedFile.data.keys());
-    const missingSchemas = difference(schemas, sheets);
-    if (missingSchemas.length > 0 ) {
-      throw new BadRequestException(`Schemas: [${missingSchemas.join(', ')}] not found in the Excel file`);
-    }
+    // const missingSchemas = difference(schemas, sheets);
+    // if (missingSchemas.length > 0 ) {
+    //   throw new BadRequestException(`Schemas: [${missingSchemas.join(', ')}] not found in the Excel file`);
+    // }
     const missingSheets = difference(sheets, schemas);
-    if (missingSheets.length > 0 ) {
+    if (missingSheets.length > 0) {
       throw new BadRequestException(`Sheets: [${missingSheets.join(', ')}] not found in the dictionary`);
     }
   }

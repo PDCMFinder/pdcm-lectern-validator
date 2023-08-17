@@ -18,7 +18,7 @@ import * as dictionaryService from './services/dictionary.service';
 import { type AppConfig } from './config';
 import getLogger from './lib/logger';
 import { ConfigurationException } from './exceptions/configuration.exception';
-import { ServerConfigurationAppError } from './exceptions/ServerConfigurationAppError';
+import { ServerConfigurationAppError } from './exceptions/server-configuration-api-error';
 
 const logger = getLogger('BOOTSTRAP');
 

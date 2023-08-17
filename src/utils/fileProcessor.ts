@@ -14,11 +14,8 @@
  * License.
  ****************************************************************************** */
 
-import getLogger from '@/lib/logger';
 import { type ProcessedFile } from '@/models/validation.model';
 import XLSX from 'xlsx';
-
-const logger = getLogger('fileProcessor');
 
 class FileProcessor {
   /**
@@ -32,7 +29,7 @@ class FileProcessor {
 
     const wb = XLSX.readFile(file.path);
     const sheets = wb.SheetNames;
-    logger.info('Sheets:', sheets);
+
     sheets.forEach((sheet: any) => {
       const data = XLSX.utils.sheet_to_json(wb.Sheets[sheet], opts);
       const dataWithoutComments = removeComments(data);

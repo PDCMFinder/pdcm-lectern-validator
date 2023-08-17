@@ -14,40 +14,41 @@
  * License.
  ****************************************************************************** */
 
-import { Response } from 'express';
-import { AppError, HttpCode } from './AppError';
+import { type Response } from 'express';
+import { AppError } from './AppError';
+import { StatusCodes } from 'http-status-codes';
 
 class ErrorHandler {
-    private isTrustedError(error: Error): boolean {
-        if (error instanceof AppError) {
-            return error.isOperational;
-        }
-
-        return false;
+  private isTrustedError (error: Error): boolean {
+    if (error instanceof AppError) {
+      return error.isOperational;
     }
 
-    private handleTrustedError(error: AppError, response: Response): void {
-        response.status(error.httpCode).json({ message: error.message });
+    return false;
+  }
+
+  private handleTrustedError (error: AppError, response: Response): void {
+    response.status(error.httpCode).json({ name: error.name, message: error.message });
+  }
+
+  private handleCriticalError(error: Error | AppError, response?: Response): void {
+    if (response != null) {
+      response
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ name: 'Internal server error', message: 'Application will shut down. Please inform the admin team.', details: error.message });
     }
 
-    private handleCriticalError(error: Error | AppError, response?: Response): void {
-        if (response) {
-            response
-                .status(HttpCode.INTERNAL_SERVER_ERROR)
-                .json({ message: 'Internal server error. Application will shut down. Please inform the admin team.', details:  error.message});
-        }
+    console.log('Application encountered a critical error. Exiting');
+    process.exit(1);
+  }
 
-        console.log('Application encountered a critical error. Exiting');
-        process.exit(1);
+  public handleError (error: Error | AppError, response?: Response): void {
+    if (this.isTrustedError(error) && (response != null)) {
+      this.handleTrustedError(error as AppError, response);
+    } else {
+      this.handleCriticalError(error, response);
     }
-
-    public handleError(error: Error | AppError, response?: Response): void {
-        if (this.isTrustedError(error) && response) {
-            this.handleTrustedError(error as AppError, response);
-        } else {
-            this.handleCriticalError(error, response);
-        }
-    }
+  }
 }
 
 export const errorHandler = new ErrorHandler();

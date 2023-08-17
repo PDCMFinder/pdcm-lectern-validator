@@ -14,8 +14,8 @@
  * License.
  ****************************************************************************** */
 
-import express, { NextFunction, Request, Response } from 'express';
-import getLogger from "../lib/logger";
+import express, { type NextFunction, type Request, type Response } from 'express';
+import getLogger from '../lib/logger';
 import { errorHandler } from '@/exceptions/ErrorHandler';
 
 const router = express.Router();
@@ -24,20 +24,6 @@ const logger = getLogger('Index');
 /* GET home page. */
 router.get('/', (_req, res, _next) => {
   res.render('index', { title: 'PDCM validator using Lectern' });
-});
-
-// This section needs to be at the end. Used to handle exceptions
-
-router.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  // 1. Log the error or send it to a 3rd party error monitoring software
-  logger.error(err.toString());
-
-  next(err);
-});
-
-router.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  // Lastly, handle the error
-  errorHandler.handleError(err, res);
 });
 
 export default router;

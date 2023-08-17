@@ -14,7 +14,8 @@
  * License.
  ****************************************************************************** */
 
-import { AppError, HttpCode } from "./AppError";
+import { StatusCodes } from 'http-status-codes';
+import { AppError } from './AppError';
 
 /**
  * Error in the configuration of the server. Examples:
@@ -22,11 +23,11 @@ import { AppError, HttpCode } from "./AppError";
  * - Database is not up.
  * - Validation dictionary was not found.
  * - Validation dictionary has not been configured.
- * 
+ *
  * This type of error will make the app shut down as it needs something to be fixed on the server side and then restart the application.
  */
 export class ServerConfigurationAppError extends AppError {
-    constructor(description: string) {
-        super({ name: 'Server configuration error', httpCode: HttpCode.INTERNAL_SERVER_ERROR, description, isOperational: false })
-    }
+  constructor (description: string) {
+    super({ name: 'Server configuration error', httpCode: StatusCodes.INTERNAL_SERVER_ERROR, description, isOperational: false });
+  }
 }

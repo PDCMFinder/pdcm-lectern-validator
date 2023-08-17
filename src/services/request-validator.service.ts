@@ -15,8 +15,8 @@
  ****************************************************************************** */
 
 import { type Request } from 'express';
-import { BadRequestException } from '@/exceptions/bad-request.exception';
 import { StatusCodes } from 'http-status-codes';
+import { BadRequestException } from '@/exceptions/bad-request.exception';
 
 const AcceptedFormats = [
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -24,7 +24,7 @@ const AcceptedFormats = [
 
 const validateFileExists = (file: Express.Multer.File | undefined): void => {
   if (file == null) {
-    throw new BadRequestException('No file uploaded', StatusCodes.BAD_REQUEST);
+    throw new BadRequestException('No file uploaded');
   }
 };
 

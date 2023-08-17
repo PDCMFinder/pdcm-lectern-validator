@@ -20,14 +20,31 @@ describe('Excel file validator', () => {
   it('should throw error when no file is uploaded', async () => {
     const response = await request(app).post('/validation/upload-excel');
     expect(response.statusCode).toEqual(400);
-    expect(response.text).toEqual("No file uploaded");
+    const expectedResponse = {
+      name: 'Bad request error',
+      message: 'No file uploaded'
+    }
+    expect(JSON.parse(response.text)).toEqual(expectedResponse);
   })
 
   it('should throw error when no dictionary service has not been correctly initialized', async () => {
     const filePath = `${__dirname}/test_files/schema_ok_data_empty.xlsx`;
+    const mockExit = jest.spyOn(process, 'exit')
+      .mockImplementation((number) => { throw new Error('process.exit: ' + number); });
+
     const response = await request(app).post('/validation/upload-excel').attach('file', filePath);
+
+    expect(mockExit).toHaveBeenCalledWith(1);
+    mockExit.mockRestore();
+
+    const expectedResponse = {
+      name: 'Internal server error',
+      message: 'Application will shut down. Please inform the admin team.',
+      details: 'Validator Service not initialized, you should call create first.'
+    }
+
     expect(response.statusCode).toEqual(500);
-    expect(response.text).toEqual("Validator Service not initialized, you should call create first");
+    expect(JSON.parse(response.text)).toEqual(expectedResponse);
   })
 
   it('should throw error when Lectern is not running', async () => {
@@ -46,11 +63,23 @@ describe('Excel file validator', () => {
     const filePath = `${__dirname}/test_files/schema_ok_data_empty.xlsx`;
     // Set a dictionary
     dictionaryService.create(dictionaryServiceUrl);
+
+    const mockExit = jest.spyOn(process, 'exit')
+      .mockImplementation((number) => { throw new Error('process.exit: ' + number); });
+
     const response = await request(app).post('/validation/upload-excel').attach('file', filePath);
 
-    expect(response.statusCode).toEqual(500);
-    expect(response.text).toEqual("File could not be validated because a suitable dictionary to validate against was not found");
+    expect(mockExit).toHaveBeenCalledWith(1);
+    mockExit.mockRestore();
 
+    const expectedResponse = {
+      name: 'Internal server error',
+      message: 'Application will shut down. Please inform the admin team.',
+      details: 'File could not be validated because a suitable dictionary to validate against was not found.'
+    }
+
+    expect(response.statusCode).toEqual(500);
+    expect(JSON.parse(response.text)).toEqual(expectedResponse);
   })
 
   it('should pass when using default dictionary and a valid file', async () => {
@@ -116,9 +145,9 @@ describe('Excel file validator', () => {
     expect(resultAsJSON['sheetsValidationResults']).toEqual(sheetsValidationResults);
   })
 
-  it('should report missing schema when the file does not have a schema that is defined in the dictionary', async () => {
+  it('should report unknown sheet when the file has a sheet that is not defined as a schema in the dictionary', async () => {
     const dictionaryServiceUrl = 'http://localhost';
-    const filePath = `${__dirname}/test_files/missing_schema.xlsx`;
+    const filePath = `${__dirname}/test_files/extra_sheet.xlsx`;
     // Set a dictionary
     dictionaryService.create('http://localhost:54321/lectern');
     const dictionaryPath = `${__dirname}/test_files/CancerModels_dictionary_1.0.json`;
@@ -141,7 +170,12 @@ describe('Excel file validator', () => {
 
     const response = await request(app).post('/validation/upload-excel').attach('file', filePath);
     expect(response.statusCode).toEqual(400);
-    expect(response.text).toEqual("Schemas: [sharing] not found in the Excel file");
+    const expectedResponse = {
+      name: 'Bad request error',
+      message: 'Sheets: [extra_sheet] not found in the dictionary'
+    }
+    expect(JSON.parse(response.text)).toEqual(expectedResponse);
+    // expect(response.text).toEqual("Sheets: [extra_sheet] not found in the dictionary");
   })
 
 })
