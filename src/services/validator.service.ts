@@ -21,12 +21,13 @@ import {
 import { type SchemasDictionary } from '@overturebio-stack/lectern-client/lib/schema-entities';
 import FileProcessor from '../utils/fileProcessor';
 import * as dictionaryService from './dictionary.service';
-import { getLogger } from '@/utils/loggers';
 import {
   type ProcessedFile, type SheetValidationResult, type ValidationReport, ValidationResultStatus, type MutableSchemaValidationError
 } from '@/models/validation.model';
 import { ConfigurationException } from '@/exceptions/configuration.exception';
 import { BadRequestException } from '@/exceptions/bad-request.exception';
+import { difference } from 'lodash';
+import getLogger from '@/lib/logger';
 
 const logger = getLogger('VALIDATOR_SERVICE');
 const fileProcessor = new FileProcessor();
@@ -49,6 +50,8 @@ class ValidatorService {
       logger.error('No validation dictionary found');
       throw new ConfigurationException('File could not be validated because a suitable dictionary to validate against was not found');
     }
+    // Inactive for now
+    // this.#validateSchemasAndSheetsMatch(validationDictionary, processedFile);
 
     processedFile.data.forEach((value, key) => {
       const sheetValidationResult: SheetValidationResult = this.#processSheet(key, value, validationDictionary);
@@ -124,6 +127,19 @@ class ValidatorService {
     const anyInvalid: boolean = sheetsValidationResults
       .some((x) => x.status !== ValidationResultStatus.VALID);
     return anyInvalid ? ValidationResultStatus.INVALID : ValidationResultStatus.VALID;
+  }
+
+  #validateSchemasAndSheetsMatch (dictionary: SchemasDictionary, processedFile: ProcessedFile): void {
+    const schemas = dictionary.schemas.map(e => e.name);
+    const sheets = Array.from(processedFile.data.keys());
+    const missingSchemas = difference(schemas, sheets);
+    if (missingSchemas.length > 0 ) {
+      throw new BadRequestException(`Schemas: [${missingSchemas.join(', ')}] not found in the Excel file`);
+    }
+    const missingSheets = difference(sheets, schemas);
+    if (missingSheets.length > 0 ) {
+      throw new BadRequestException(`Sheets: [${missingSheets.join(', ')}] not found in the dictionary`);
+    }
   }
 }
 

@@ -17,6 +17,8 @@
 import * as dictionaryService from './services/dictionary.service';
 import { type AppConfig } from './config';
 import getLogger from './lib/logger';
+import { ConfigurationException } from './exceptions/configuration.exception';
+import { ServerConfigurationAppError } from './exceptions/ServerConfigurationAppError';
 
 const logger = getLogger('BOOTSTRAP');
 
@@ -36,7 +38,8 @@ const initValidationDictionary = async (config: AppConfig): Promise<void> => {
   try {
     dictionaryService.create(dictionaryServiceUrl);
     await dictionaryService.instance().loadValidationDictionary(dictionaryName, dictionaryVersion);
-  } catch (err) {
-    logger.error(err);
+  } catch (error) {
+    logger.error(error);
+    process.exit();
   }
 };

@@ -45,14 +45,20 @@ export class DictionaryService {
     try {
       logger.info(`Fetching validation dictionary. Name: ${name} - Version: ${version}`);
       const validationDictionary = await dictionaryRestClient.fetchSchema(this.dictionaryServiceUrl, name, version);
-      logger.info('Dictionary fetched successfully');
       this.latestVersionDictionary = validationDictionary;
+
+      if (!validationDictionary) {
+        throw new ConfigurationException(`Dictionary named [${name}] with version [${version}] does not exist.`);
+      }
+      logger.info('Dictionary fetched successfully');
       // Sets the version used for reference
       this.setValidationDictionaryInformation(name, version);
       return validationDictionary;
-    } catch (err) {
-      let errorMessage = `Could not fetch dictionary from ${this.dictionaryServiceUrl}.`;
-      errorMessage += ` Check that Lectern is running and that a dictionary named [${name}] with version ${version} exists.`;
+    } catch (error) {
+      if (error instanceof ConfigurationException) {
+        throw error;
+      }      
+      let errorMessage = `Could not fetch dictionary from ${this.dictionaryServiceUrl}. Check that Lectern is running.`;
       throw new ConfigurationException(errorMessage);
     }
   };
@@ -103,6 +109,6 @@ export function instance (): DictionaryService {
 }
 
 export function create (schemaServiceUrl: string): void {
-  logger.info('Creating service with url', schemaServiceUrl);
+  logger.info(`Creating service with url ${schemaServiceUrl}`);
   dictionaryService = new DictionaryService(schemaServiceUrl);
 }
