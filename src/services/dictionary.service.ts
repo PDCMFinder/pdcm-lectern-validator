@@ -21,6 +21,7 @@ import {
 
 import { ConfigurationException } from '@/exceptions/configuration.exception';
 import getLogger from '@/lib/logger';
+import { FieldDefinition, SchemaDefinition, SchemasDictionary } from '@overturebio-stack/lectern-client/lib/schema-entities';
 
 const logger = getLogger('DICTIONARY_SERVICE');
 
@@ -106,6 +107,18 @@ export function instance (): DictionaryService {
     throw new ConfigurationException('Validator Service not initialized, you should call create first.');
   }
   return dictionaryService;
+}
+
+export function getFieldDefinition (dictionary: SchemasDictionary, schemaName: string, fieldName: string): FieldDefinition {
+  const schema: SchemaDefinition | undefined = dictionary.schemas.find(x => x.name === schemaName);
+  if (schema === undefined) {
+    throw new ConfigurationException(`Schema ${schemaName} does not exist.`);
+  }
+  const field: FieldDefinition | undefined = schema.fields.find(x => x.name === fieldName);
+  if (field === undefined) {
+    throw new ConfigurationException(`Field ${fieldName} does not exist in schema ${schemaName}.`);
+  }
+  return field;
 }
 
 export function create (schemaServiceUrl: string): void {

@@ -209,11 +209,13 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
         "status": "invalid",
         "result": [
           {
-            errorType: "MISSING_REQUIRED_FIELD",
+            errorType: "Missing required field",
             fieldName: "patient_id",
             index: 2,
-            info: {},
-            message: "patient_id is a required field.",
+            info: {
+              format: "Alphanumeric"
+            },
+            message: "A required field is missing from the input data.",
           },
         ]
       },
@@ -265,15 +267,16 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
         "status": "invalid",
         "result": [
           {
-            errorType: "INVALID_ENUM_VALUE",
+            errorType: "Value error",
             fieldName: "sex",
             index: 2,
             info: {
+              format: "Any of the following values: [male, female, other, not collected, not provided]",
               value: [
                 "invalid_sex_value",
               ],
             },
-            message: "The value is not permissible for this field.",
+            message: "The provided value/data does not match any of the allowed values.",
           },
         ]
       },
@@ -308,7 +311,71 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
     expect(resultAsJSON['sheetsValidationResults']).toEqual(sheetsValidationResults);
   })
 
-  it('should report an error if there is an unrecognised field in the Excel file', async () => {
+  it('should report an error if a field has an invalid format (regexp)', async () => {
+    const filePath = `${__dirname}/test_files/invalid_value.xlsx`;
+
+    mockDictionaryResponse();
+
+    // Load the lectern dictionary. It would use the mock http server so the returned dictionary would be taken from a file.
+    await dictionaryService.instance().loadValidationDictionary("schemaName", '1.0');
+
+    const response = await request(app).post('/validation/upload-excel').attach('file', filePath);
+    const resultAsJSON = JSON.parse(response.text);
+
+    const sheetsValidationResults = [
+      {
+        "sheetName": "patient",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "patient_sample",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "pdx_model",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "model_validation",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "cell_model",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "sharing",
+        "status": "invalid",
+        "result": [
+
+          {
+            errorType: "Invalid format",
+            fieldName: "email",
+            index: 1,
+            info: {
+              examples: "j.doe@example.com",
+              regex: "^(([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)+,?\\s?)*|(N|n)ot (P|p)rovided|(N|n)ot (C|c)ollected)$",
+              format: "Email address",
+              value: [
+                "wrong_email",
+              ]
+            },
+            "message": "The field's value does not comply with the defined regular expression pattern.",
+          },
+        ]
+      }
+    ]
+
+    expect(response.statusCode).toEqual(201);
+    expect(resultAsJSON['sheetsValidationResults']).toEqual(sheetsValidationResults);
+  })
+
+  it('should report an error if there is an unrecognized field in the Excel file', async () => {
     const filePath = `${__dirname}/test_files/unrecognized_field.xlsx`;
 
     mockDictionaryResponse();
@@ -325,11 +392,11 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
         "status": "invalid",
         "result": [
           {
-            errorType: "UNRECOGNIZED_FIELD",
+            errorType: "Unrecognized field",
             fieldName: "field_x",
             index: 0,
             info: {},
-            message: "UNRECOGNIZED_FIELD",
+            message: "The submitted data has a field which is not in the schema.",
           },
         ]
       },
