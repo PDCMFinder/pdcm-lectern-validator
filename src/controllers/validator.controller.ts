@@ -19,11 +19,11 @@ import ValidatorService from '../services/validator.service';
 import { validateFileInRequest } from '@/services/request-validator.service';
 import asyncHandler from 'express-async-handler';
 import { ConfigurationException } from '@/exceptions/configuration.exception';
-import getLogger from '@/lib/logger';
 import { BadRequestException } from '@/exceptions/bad-request.exception';
 import { AppError } from '@/exceptions/AppError';
 import { BadRequestApiError } from '@/exceptions/bad-request-api-error';
 import { ServerConfigurationAppError } from '@/exceptions/server-configuration-api-error';
+import { StatusCodes } from 'http-status-codes';
 
 const validatorService = new ValidatorService();
 
@@ -47,7 +47,7 @@ export const validateExcelData = asyncHandler(async (req: any, res: Response, ne
     const file: Express.Multer.File = validateFileInRequest(req);
     const validationReport = await validatorService.validateExcelFile(file);
 
-    res.status(201).send(validationReport);
+    res.status(StatusCodes.OK).send(validationReport);
   } catch (error: any) {
     handleApiError(error, req)
   }

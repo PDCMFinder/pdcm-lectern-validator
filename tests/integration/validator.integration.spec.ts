@@ -20,6 +20,7 @@ import * as dictionaryService from '../../src/services/dictionary.service';
 import { ConfigurationException } from '../../src/exceptions/configuration.exception';
 import { SchemasDictionary } from '@overturebio-stack/lectern-client/lib/schema-entities';
 import { promisify } from 'util';
+import { StatusCodes } from 'http-status-codes';
 const ServerMock: any = require('mock-http-server') as any;
 const server = new ServerMock({ host: 'localhost', port: 54321 });
 const mockedDictionaryServiceUrl = 'http://localhost:54321/lectern';
@@ -185,7 +186,7 @@ describe('Happy path scenarios', () => {
       }
     ]
 
-    expect(response.statusCode).toEqual(201);
+    expect(response.statusCode).toEqual(StatusCodes.OK);
     expect(resultAsJSON['sheetsValidationResults']).toEqual(sheetsValidationResults);
   })
 })
@@ -246,7 +247,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
       }
     ]
 
-    expect(response.statusCode).toEqual(201);
+    expect(response.statusCode).toEqual(StatusCodes.OK);
     expect(resultAsJSON['sheetsValidationResults']).toEqual(sheetsValidationResults);
   })
 
@@ -307,7 +308,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
       }
     ]
 
-    expect(response.statusCode).toEqual(201);
+    expect(response.statusCode).toEqual(StatusCodes.OK);
     expect(resultAsJSON['sheetsValidationResults']).toEqual(sheetsValidationResults);
   })
 
@@ -371,7 +372,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
       }
     ]
 
-    expect(response.statusCode).toEqual(201);
+    expect(response.statusCode).toEqual(StatusCodes.OK);
     expect(resultAsJSON['sheetsValidationResults']).toEqual(sheetsValidationResults);
   })
 
@@ -427,7 +428,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
       }
     ]
 
-    expect(response.statusCode).toEqual(201);
+    expect(response.statusCode).toEqual(StatusCodes.OK);
     expect(resultAsJSON['sheetsValidationResults']).toEqual(sheetsValidationResults);
   })
 
