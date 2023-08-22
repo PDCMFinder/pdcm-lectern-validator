@@ -42,7 +42,7 @@ const mockDictionaryResponse = () => {
     method: 'GET',
     path: '/lectern/dictionaries',
     reply: {
-      status: 200,
+      status: StatusCodes.OK,
       headers: { 'content-type': 'application/json' },
       body: () => {
         return JSON.stringify(mockValidationDictionary);
@@ -69,7 +69,7 @@ describe('Server configuration errors', () => {
       details: 'Validator Service not initialized, you should call create first.'
     }
 
-    expect(response.statusCode).toEqual(500);
+    expect(response.statusCode).toEqual(StatusCodes.INTERNAL_SERVER_ERROR);
     expect(JSON.parse(response.text)).toEqual(expectedResponse);
   })
 
@@ -103,7 +103,7 @@ describe('Server configuration errors', () => {
       details: 'File could not be validated because a suitable dictionary to validate against was not found.'
     }
 
-    expect(response.statusCode).toEqual(500);
+    expect(response.statusCode).toEqual(StatusCodes.INTERNAL_SERVER_ERROR);
     expect(JSON.parse(response.text)).toEqual(expectedResponse);
   })
 })
@@ -117,7 +117,7 @@ describe('Request related errors', () => {
       name: 'Bad request error',
       message: 'No file uploaded'
     }
-    expect(response.statusCode).toEqual(400);
+    expect(response.statusCode).toEqual(StatusCodes.BAD_REQUEST);
     expect(JSON.parse(response.text)).toEqual(expectedResponse);
   })
 
@@ -135,7 +135,7 @@ describe('Request related errors', () => {
       name: 'Bad request error',
       message: 'Sheets: [extra_sheet] not found in the dictionary'
     }
-    expect(response.statusCode).toEqual(400);
+    expect(response.statusCode).toEqual(StatusCodes.BAD_REQUEST);
     expect(JSON.parse(response.text)).toEqual(expectedResponse);
   })
 
