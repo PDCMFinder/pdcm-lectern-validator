@@ -1,0 +1,17 @@
+version: "2"
+
+services:
+  lecternDb:
+    image: "bitnami/mongodb:4.0"
+    ports:
+      - "27272:27017"
+    volumes:
+      - "mongodb_data:/bitnami"
+    environment:
+      MONGODB_USERNAME: admin
+      MONGODB_PASSWORD: password
+      MONGODB_DATABASE: lectern
+      MONGODB_ROOT_PASSWORD: password123
+volumes:
+  mongodb_data:
+    driver: local

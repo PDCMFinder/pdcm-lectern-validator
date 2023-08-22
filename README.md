@@ -31,7 +31,8 @@ The PDCM Lectern Validator is a web service designed to streamline the metadata 
 | `/dictionary`              | Get the current Lectern Dictionary used for the validations | GET         |
 
 ## /validation/upload-excel
-Validates an Excel file against a Lectern dictionary
+Validates an Excel file against a Lectern dictionary.
+
 **HTTP Method**: POST
 ### Form Parameters
 file: The file to validate
@@ -108,7 +109,8 @@ Common errors are:
 - There is not a valid dictionaty configured in the system.
 
 ## /dictionary
-Get the current Lectern Dictionary used for the validations
+Get the current Lectern Dictionary used for the validations.
+
 **HTTP Method**: GET
 ### Response
 #### Supported Media Types
@@ -150,8 +152,24 @@ The submitted data has a field which is not in the schema.
 
 ## Getting Started
 
-1. Clone this repository using `git clone`.
-2. Install project dependencies by running `yarn install`.
+### Clone the repository
+Clone this repository using `git clone`.
+
+### Mongo DB and Lectern
+This validator needs a Mongo db and an instance of Lectern.
+
+#### Mongo DB setup
+You can use the file `docker-compose.yaml` to start a docker container with a mongo db, which is useful for development purposes. 
+`docker-compose up -d`.
+
+If you use this container, the Mongo instance will be listening on the port 27272 of the host machine.
+
+#### Lectern setup
+You can read the documentation at https://github.com/overture-stack/lectern to clone the code and start the service. An important part of the setup is to create a suitable `.env` where you set the credentials to connect to the Mongo db.
+
+
+### Install project dependencies
+Install project dependencies by running `yarn install`.
 
 ## Usage
 
