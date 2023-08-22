@@ -1,36 +1,163 @@
 # PDCM Lectern Validator
-Status: Under development
+![Project Status](https://img.shields.io/badge/status-under%20development-blue)
 
 ## Introduction
 
-PDCM Lectern Validator is a web service that allows to validate metadata templates as part of the submision process for [CancerModels.org](https://www.cancermodels.org/submit).
+The PDCM Lectern Validator is a web service designed to streamline the metadata validation process within the submission workflow for [CancerModels.org](https://www.cancermodels.org/submit).
 
-### Input
+### Features
 
-The service exposes a REST endpoint that allows the user to submit an Excel file containing the metadata to be validated.
+- Validate metadata templates.
+- Feedback on metadata errors.
 
-### Process
+## Table of Contents
 
-The Excel file is read and transformed into a suitable format to then be validated against a [Lectern](https://github.com/overture-stack/lectern) dictionary. The logic that validates that the Excel content complies with the dictionary definition is provided by the same team that developed Lectern and is published as an npm package at [lectern-client](https://www.npmjs.com/package/@overturebio-stack/lectern-client).
+- [REST API Endpoints](#rest-api-endpoints)
+    - [Summary table](#summary-table)
+- [Input](#input)
+- [Process](#process)
+- [Output](#output)
+- [Technology Stack](#technology-stack)
+- [Getting Started](#getting-started)
+- [Usage](#usage)
+- [Acknowledgments](#acknowledgments)
 
-### Output
+# REST API Endpoints
+## Summary table
 
-The output of the process is a JSON file describing any errors in the data.
+| Endpoint                   | Description                                                 | HTTP Method |
+|----------------------------|-------------------------------------------------------------|-------------|
+| `/validation/upload-excel` | Validates an Excel file against a Lectern dictionary        | POST        |
+| `/dictionary`              | Get the current Lectern Dictionary used for the validations | GET         |
 
-## Technology
+## /validation/upload-excel
+Validates an Excel file against a Lectern dictionary
+**HTTP Method**: POST
+### Form Parameters
+file: The file to validate
+### Response
+#### Supported Media Types
+- application/json
+#### 200 Response
+The Excel file was validated
 
-- NodeJS 18.4.0
-- TypeScript 4.4.3
-- ExpressJS 4.16.1
-
-## How to use
-
-1. Git clone this repo
-2. Run `yarn install`
-
-## **Scripts**
-
+##### Body
+Example
 ```
+{
+    "date": "2023-08-22T08:34:30.541Z",
+    "fileName": "missing_required_field.xlsx",
+    "status": "invalid",
+    "dictionaryName": "CancerModels_Dictionary",
+    "dictionaryVersion": "1.0",
+    "sheetsValidationResults": [
+        {
+            "sheetName": "patient",
+            "status": "invalid",
+            "result": [
+                {
+                    "errorType": "Missing required field",
+                    "index": 2,
+                    "fieldName": "patient_id",
+                    "info": {
+                        "format": "Alphanumeric"
+                    },
+                    "message": "A required field is missing from the input data."
+                }
+            ]
+        },
+        {
+            "sheetName": "patient_sample",
+            "status": "valid",
+            "result": []
+        },
+        {
+            "sheetName": "pdx_model",
+            "status": "valid",
+            "result": []
+        },
+        {
+            "sheetName": "model_validation",
+            "status": "valid",
+            "result": []
+        },
+        {
+            "sheetName": "cell_model",
+            "status": "valid",
+            "result": []
+        },
+        {
+            "sheetName": "sharing",
+            "status": "valid",
+            "result": []
+        }
+    ]
+}
+```
+#### 400 Response
+Bad request.
+Common errors are:
+- The file was not sent in the request.
+- The file contains sheets that are not in the dictionary.
+
+#### 500 Response
+Internal Server Error.
+Common errors are:
+- The Lectern service is not running.
+- The database is not up.
+- There is not a valid dictionaty configured in the system.
+
+## /dictionary
+Get the current Lectern Dictionary used for the validations
+**HTTP Method**: GET
+### Response
+#### Supported Media Types
+- application/json
+#### 200 Response
+The Lectern dictionary currently used for the validations.
+
+## Input
+
+The service offers a RESTful API endpoint, allowing users to submit Excel files containing metadata to be validated.
+
+## Process
+
+Uploaded Excel files are transformed into a suitable format before undergoing validation against the [Lectern](https://github.com/overture-stack/lectern) dictionary. The validation logic is powered by the dedicated team behind Lectern and is available as an npm package, [lectern-client](https://www.npmjs.com/package/@overturebio-stack/lectern-client).
+
+## Output
+
+Upon completion, the service generates a detailed JSON report, highlighting any errors detected during the validation process.
+
+### Possible errors
+
+#### Value error
+The field only accepts values from a restricted list and the current value does not match any of the allowed values.
+
+#### Invalid format
+The field's value does not comply with the defined regular expression pattern.
+
+#### Missing required field
+The field is required but the current value is empty/null.
+
+#### Unrecognized field
+The submitted data has a field which is not in the schema.
+
+## Technology Stack
+
+- Node.js 18.4.0
+- TypeScript 4.4.3
+- Express.js 4.16.1
+
+## Getting Started
+
+1. Clone this repository using `git clone`.
+2. Install project dependencies by running `yarn install`.
+
+## Usage
+
+Start the server using the following command:
+
+```bash
 yarn start
 ```
 
