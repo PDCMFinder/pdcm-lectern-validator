@@ -25,13 +25,13 @@ export interface ProcessedFile {
   data: Map<string, any>
 }
 
-export type PDCMSchemaValidationError = {
-    readonly errorType: string;
-    readonly index: number;
-    readonly fieldName: string;
-    readonly info: Record<string, any>;
-    readonly message: string;
-};
+export interface PDCMSchemaValidationError {
+  readonly errorType: string
+  readonly index: number
+  readonly fieldName: string
+  readonly info: Record<string, any>
+  readonly message: string
+}
 
 export interface SheetValidationResult {
   sheetName: string

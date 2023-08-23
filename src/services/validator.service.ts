@@ -18,7 +18,7 @@ import {
   functions as lecternSchemaFunctions
 } from '@overturebio-stack/lectern-client';
 
-import { FieldDefinition, type SchemasDictionary } from '@overturebio-stack/lectern-client/lib/schema-entities';
+import { type FieldDefinition, type SchemasDictionary } from '@overturebio-stack/lectern-client/lib/schema-entities';
 import FileProcessor from '../utils/fileProcessor';
 import * as dictionaryService from './dictionary.service';
 import {
@@ -32,18 +32,18 @@ import getLogger from '@/lib/logger';
 const logger = getLogger('VALIDATOR_SERVICE');
 const fileProcessor = new FileProcessor();
 
-const errorTypeMapping: Map<string, string> = new Map([
+const errorTypeMapping = new Map<string, string>([
   ['MISSING_REQUIRED_FIELD', 'Missing required field'],
   ['INVALID_BY_REGEX', 'Invalid format'],
   ['INVALID_ENUM_VALUE', 'Value error'],
-  ['UNRECOGNIZED_FIELD', 'Unrecognized field'],
+  ['UNRECOGNIZED_FIELD', 'Unrecognized field']
 ]);
 
-const errorTextMapping: Map<string, string> = new Map([
+const errorTextMapping = new Map<string, string>([
   ['MISSING_REQUIRED_FIELD', 'A required field is missing from the input data.'],
   ['INVALID_BY_REGEX', 'The field\'s value does not comply with the defined regular expression pattern.'],
   ['INVALID_ENUM_VALUE', 'The provided value/data does not match any of the allowed values.'],
-  ['UNRECOGNIZED_FIELD', 'The submitted data has a field which is not in the schema.'],
+  ['UNRECOGNIZED_FIELD', 'The submitted data has a field which is not in the schema.']
 ]);
 
 class ValidatorService {
@@ -51,7 +51,7 @@ class ValidatorService {
    * Reads the content of an Excel file from the request and validates its content against a
    * JSON schema (a dictionary in Lectern).
    */
-  public async validateExcelFile(file: Express.Multer.File): Promise<ValidationReport> {
+  public async validateExcelFile (file: Express.Multer.File): Promise<ValidationReport> {
     logger.info(`Validating excel file ${file.originalname}`);
     const sheetsValidationResults: SheetValidationResult[] = [];
 
@@ -75,10 +75,9 @@ class ValidatorService {
     const validationReport: ValidationReport = this.#buildReport(processedFile.fileName, validationDictionary.name, validationDictionary.version, sheetsValidationResults);
 
     return await Promise.resolve(validationReport);
-
   }
 
-  #processSheet(schemaName: string, records: Map<string, any>, dictionary: SchemasDictionary): SheetValidationResult {
+  #processSheet (schemaName: string, records: Map<string, any>, dictionary: SchemasDictionary): SheetValidationResult {
     const sheetValidationResult: SheetValidationResult = {
       sheetName: schemaName
     };
@@ -95,7 +94,7 @@ class ValidatorService {
 
       // SchemaValidationError is read only so we need to copy data to a structure without those restrictions
       const validationErrors: PDCMSchemaValidationError[] = validationResults.validationErrors.map((x: any) =>
-      this.#transformLecternError(x, dictionary, schemaName, x.fieldName)
+        this.#transformLecternError(x, dictionary, schemaName, x.fieldName)
       // ({
       //   errorType: this.#getMappedErrorType(x.errorType),
       //   index: x.index,
@@ -114,12 +113,12 @@ class ValidatorService {
     return sheetValidationResult;
   }
 
-  getSchemaNameFromFileName(fileName: string): string {
+  getSchemaNameFromFileName (fileName: string): string {
     const idx = fileName.indexOf('.');
     return fileName.slice(0, idx);
   }
 
-  #buildReport(
+  #buildReport (
     fileName: string,
     dictionaryName: string,
     dictionaryVersion: string,
@@ -139,13 +138,13 @@ class ValidatorService {
     return validationReport;
   }
 
-  #getUnifiedStatus(sheetsValidationResults: SheetValidationResult[]): ValidationResultStatus {
+  #getUnifiedStatus (sheetsValidationResults: SheetValidationResult[]): ValidationResultStatus {
     const anyInvalid: boolean = sheetsValidationResults
       .some((x) => x.status !== ValidationResultStatus.VALID);
     return anyInvalid ? ValidationResultStatus.INVALID : ValidationResultStatus.VALID;
   }
 
-  #validateSchemasAndSheetsMatch(dictionary: SchemasDictionary, processedFile: ProcessedFile): void {
+  #validateSchemasAndSheetsMatch (dictionary: SchemasDictionary, processedFile: ProcessedFile): void {
     const schemas = dictionary.schemas.map(e => e.name);
     const sheets = Array.from(processedFile.data.keys());
     // const missingSchemas = difference(schemas, sheets);
@@ -159,30 +158,30 @@ class ValidatorService {
   }
 
   // Transform Lectern Error types into customized error types for PDCM
-  #getMappedErrorType(errorType: string): string {
+  #getMappedErrorType (errorType: string): string {
     return errorTypeMapping.get(errorType) ?? errorType;
   }
 
   // Transform Lectern Error text into customized error types for PDCM
-  #getMappedErrorText(errorType: string): string {
+  #getMappedErrorText (errorType: string): string {
     return errorTextMapping.get(errorType) ?? errorType;
   }
 
-  #getExtendedInfo(originalError: any, dictionary: SchemasDictionary, schemaName: string, fieldName: string): Record<string, any> {
-    const extendedInfo = {...originalError.info};
+  #getExtendedInfo (originalError: any, dictionary: SchemasDictionary, schemaName: string, fieldName: string): Record<string, any> {
+    const extendedInfo = { ...originalError.info };
     if (originalError.errorType !== 'UNRECOGNIZED_FIELD') {
       const fieldDefinition: FieldDefinition = dictionaryService.getFieldDefinition(dictionary, schemaName, fieldName);
       // Needs to be defined as any because format is not part of the meta definition
       const meta: any = fieldDefinition.meta;
-      if (meta) {
-        const format = meta['format'];
-        extendedInfo['format'] = format;
+      if (meta !== undefined) {
+        const format = meta.format;
+        extendedInfo.format = format;
       }
     }
     return extendedInfo;
   }
 
-  #transformLecternError(originalError: any, dictionary: SchemasDictionary, schemaName: string, fieldName: string): PDCMSchemaValidationError {
+  #transformLecternError (originalError: any, dictionary: SchemasDictionary, schemaName: string, fieldName: string): PDCMSchemaValidationError {
     const newErrorType: string = this.#getMappedErrorType(originalError.errorType);
     const newInfo: Record<string, any> = this.#getExtendedInfo(originalError, dictionary, schemaName, fieldName);
     const newMessage: string = this.#getMappedErrorText(originalError.errorType);

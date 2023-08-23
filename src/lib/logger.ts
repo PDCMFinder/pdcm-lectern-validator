@@ -26,8 +26,8 @@ const levels = {
   debug: 4
 };
 
-const level = () => {
-  const env = process.env.NODE_ENV || 'development';
+const level = (): string => {
+  const env = process.env.NODE_ENV ?? 'development';
   const isDevelopment = env === 'development';
   return isDevelopment ? 'debug' : 'warn';
 };
@@ -49,7 +49,7 @@ const consoleTransport = new winston.transports.Console(
       winston.format.colorize(),
       winston.format.simple(),
       winston.format.printf(
-        (info) => `${info.timestamp} ${info.level} - [${info.service}]: ${info.message}`
+        (info) => `${info.timestamp as string} ${info.level} - [${info.service as string}]: ${info.message as string}`
       )
     )
   }

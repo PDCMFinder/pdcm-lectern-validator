@@ -31,7 +31,7 @@ class ErrorHandler {
     response.status(error.httpCode).json({ name: error.name, message: error.message });
   }
 
-  private handleCriticalError(error: Error | AppError, response?: Response): void {
+  private handleCriticalError (error: Error | AppError, response?: Response): void {
     if (response != null) {
       response
         .status(StatusCodes.INTERNAL_SERVER_ERROR)

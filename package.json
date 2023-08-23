@@ -5,7 +5,7 @@
   "scripts": {
     "start": "export NODE_OPTIONS='--trace-deprecation --abort-on-uncaught-exception' && export NODE_ENV=development && nodemon --exec ts-node ./bin/www.ts",
     "build": "sh etc/build.sh",
-    "test": "jest",
+    "test": "npm-run-all --aggregate-output cov:clean -p cov:unit cov:integration -s cov:summary-preset cov:report",
     "test:watch": "jest --watch",
     "test:unit": "npm-run-all cov:clean cov:unit",
     "test:integration": "npm-run-all cov:clean cov:integration",
@@ -14,7 +14,9 @@
     "eslint:fix": "eslint --fix 'src/**/*.ts'",
     "cov:clean": "rimraf .nyc_output && rimraf coverage",
     "cov:unit": "jest --forceExit --colors -c jest.config.unit.ts",
-    "cov:integration": "jest -runInBand --forceExit --colors -c jest.config.integration.ts"
+    "cov:integration": "jest -runInBand --forceExit --colors -c jest.config.integration.ts",
+    "cov:summary-preset": "mkdir .nyc_output && cp coverage/unit/coverage-final.json .nyc_output/unit.json && cp coverage/integration/coverage-final.json .nyc_output/integration.json",
+    "cov:report": "nyc report --reporter html --reporter lcov --report-dir ./coverage/summary"
   },
   "dependencies": {
     "@overturebio-stack/lectern-client": "^1.4.0",

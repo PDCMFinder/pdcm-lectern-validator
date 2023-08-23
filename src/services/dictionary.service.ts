@@ -21,7 +21,7 @@ import {
 
 import { ConfigurationException } from '@/exceptions/configuration.exception';
 import getLogger from '@/lib/logger';
-import { FieldDefinition, SchemaDefinition, SchemasDictionary } from '@overturebio-stack/lectern-client/lib/schema-entities';
+import { type FieldDefinition, type SchemaDefinition, type SchemasDictionary } from '@overturebio-stack/lectern-client/lib/schema-entities';
 
 const logger = getLogger('DICTIONARY_SERVICE');
 
@@ -48,7 +48,7 @@ export class DictionaryService {
       const validationDictionary = await dictionaryRestClient.fetchSchema(this.dictionaryServiceUrl, name, version);
       this.latestVersionDictionary = validationDictionary;
 
-      if (!validationDictionary) {
+      if (validationDictionary === undefined) {
         throw new ConfigurationException(`Dictionary named [${name}] with version [${version}] does not exist.`);
       }
       logger.info('Dictionary fetched successfully');

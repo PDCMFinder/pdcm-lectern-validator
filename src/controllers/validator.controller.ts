@@ -20,7 +20,7 @@ import { validateFileInRequest } from '@/services/request-validator.service';
 import asyncHandler from 'express-async-handler';
 import { ConfigurationException } from '@/exceptions/configuration.exception';
 import { BadRequestException } from '@/exceptions/bad-request.exception';
-import { AppError } from '@/exceptions/AppError';
+import { type AppError } from '@/exceptions/AppError';
 import { BadRequestApiError } from '@/exceptions/bad-request-api-error';
 import { ServerConfigurationAppError } from '@/exceptions/server-configuration-api-error';
 import { StatusCodes } from 'http-status-codes';
@@ -32,11 +32,10 @@ const handleApiError = (error: Error | AppError, res: Response): void => {
     throw new BadRequestApiError(error.message, error.statusCode);
   } else if (error instanceof ConfigurationException) {
     throw new ServerConfigurationAppError(error.message);
-  }
-  else {
+  } else {
     throw error;
   }
-}
+};
 
 /**
  * Reads the content of an Excel file from the request and validates its content against a
@@ -49,6 +48,6 @@ export const validateExcelData = asyncHandler(async (req: any, res: Response, ne
 
     res.status(StatusCodes.OK).send(validationReport);
   } catch (error: any) {
-    handleApiError(error, req)
+    handleApiError(error, req);
   }
 });

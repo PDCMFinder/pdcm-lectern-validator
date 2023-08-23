@@ -14,12 +14,9 @@
  * License.
  ****************************************************************************** */
 
-import express, { type NextFunction, type Request, type Response } from 'express';
-import getLogger from '../lib/logger';
-import { errorHandler } from '@/exceptions/ErrorHandler';
+import express from 'express';
 
 const router = express.Router();
-const logger = getLogger('Index');
 
 /* GET home page. */
 router.get('/', (_req, res, _next) => {

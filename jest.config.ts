@@ -1,5 +1,6 @@
 export default {
     preset: 'ts-jest',
+    collectCoverage: true,
     testEnvironment: 'node',
     roots: ['<rootDir>/tests'],
     moduleFileExtensions: ['ts', 'js'],

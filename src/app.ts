@@ -14,9 +14,7 @@
  * License.
  */
 
-import createError from 'http-errors';
-
-import express, { type RequestHandler, type ErrorRequestHandler, Request, Response, NextFunction } from 'express';
+import express, { type Request, type Response, type NextFunction } from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
@@ -33,14 +31,14 @@ const log = getLogger('app');
 class App {
   public app: express.Application;
 
-  constructor() {
+  constructor () {
     this.app = express();
     this.config();
     this.routerSetup();
     this.errorHandler();
   }
 
-  private config(): void {
+  private config (): void {
     // view engine setup
     this.app.set('views', path.join(__dirname, 'views'));
     this.app.set('view engine', 'pug');
@@ -55,16 +53,16 @@ class App {
     this.app.use(express.static(path.join(__dirname, 'public')));
   }
 
-  private routerSetup(): void {
+  private routerSetup (): void {
     const baseUrl = process.env.BASE_URL ?? '';
     this.app.use(baseUrl + '/dictionary', dictionaryRouter);
     this.app.use(baseUrl + '/validation', validatorRouter);
     this.app.use(baseUrl + '/', indexRouter);
   }
 
-  private errorHandler(): void {
+  private errorHandler (): void {
     this.app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
-      log.error(err.message || err)
+      log.error(err.message ?? err);
       next(err);
     });
 
@@ -72,7 +70,6 @@ class App {
       errorHandler.handleError(err, res);
     });
   }
-
 }
 
 export default new App().app;
