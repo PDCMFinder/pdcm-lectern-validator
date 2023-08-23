@@ -181,4 +181,4 @@ yarn start
 
 ## Acknowledgments
 
-This project is being developed in collaboration between EBI and [OICR](https://oicr.on.ca/).
+This project is being developed in collaboration between [EMBL-EBI](https://www.ebi.ac.uk/about/teams/samples-phenotypes-ontologies/) and [OICR](https://oicr.on.ca/).
