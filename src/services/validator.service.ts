@@ -51,9 +51,8 @@ class ValidatorService {
    * Reads the content of an Excel file from the request and validates its content against a
    * JSON schema (a dictionary in Lectern).
    */
-  public async validateExcelFile (file: Express.Multer.File): Promise<ValidationReport> {
+  public async validateExcelFile(file: Express.Multer.File): Promise<ValidationReport> {
     logger.info(`Validating excel file ${file.originalname}`);
-    const sheetsValidationResults: SheetValidationResult[] = [];
 
     // Get an object with all the data from the Excel file
     const processedFile: ProcessedFile = await fileProcessor.processExcelFile(file);
@@ -67,58 +66,69 @@ class ValidatorService {
 
     this.#validateSchemasAndSheetsMatch(validationDictionary, processedFile);
 
+    const recordsBySchema: Record<string, any> = {};
+
     processedFile.data.forEach((value, key) => {
-      const sheetValidationResult: SheetValidationResult = this.#processSheet(key, value, validationDictionary);
-      sheetsValidationResults.push(sheetValidationResult);
+      recordsBySchema[key] = value;
+
     });
+    const sheetsValidationResults = this.#processData(validationDictionary, recordsBySchema);
 
     const validationReport: ValidationReport = this.#buildReport(processedFile.fileName, validationDictionary.name, validationDictionary.version, sheetsValidationResults);
 
     return await Promise.resolve(validationReport);
   }
 
-  #processSheet (schemaName: string, records: Map<string, any>, dictionary: SchemasDictionary): SheetValidationResult {
+  /**
+ * Calls the Lectern validation logic to validate the data against a dictionary. 
+ * @param dictionary Dictionary to use for the validations
+ * @param data Record with the data to validate. Contains all the records per schema/sheet.
+ */
+  #processData(dictionary: SchemasDictionary, data: Record<string, any>): SheetValidationResult[] {
+    const sheetsValidationResults: SheetValidationResult[] = []
+
+    // Call the logic in Lectern to validate results, which are retrieved as a Record, where the key is the schema and
+    // the value the validation result for that schema
+    const lecternValidationResults = lecternSchemaFunctions.processSchemas(dictionary, data);
+
+    // Obtain the results per schema
+    Object.keys(lecternValidationResults).forEach(schema => {
+      const schemaResults = lecternValidationResults[schema];
+
+      const sheetValidationResult = this.#processSchemaValidationResult(dictionary, schema, schemaResults);
+      sheetsValidationResults.push(sheetValidationResult);
+    })
+    return sheetsValidationResults;
+  }
+
+  #processSchemaValidationResult(dictionary: SchemasDictionary, schemaName: string, schemaValidationResults: any): SheetValidationResult {
+
     const sheetValidationResult: SheetValidationResult = {
       sheetName: schemaName
     };
 
-    const sheetRows: any[] = [...records.values()];
+    const sheetValidationStatus = schemaValidationResults.validationErrors.length > 0
+      ? ValidationResultStatus.INVALID
+      : ValidationResultStatus.VALID
 
-    try {
-      // Call the lectern validator
-      const validationResults = lecternSchemaFunctions.processRecords(dictionary, schemaName, sheetRows);
+    // SchemaValidationError is read only so we need to copy data to a structure without those restrictions
+    const validationErrors: PDCMSchemaValidationError[] = schemaValidationResults.validationErrors.map((x: any) =>
+      this.#transformLecternError(x, dictionary, schemaName, x.fieldName)
+    );
 
-      const sheetValidationStatus = validationResults.validationErrors.length > 0
-        ? ValidationResultStatus.INVALID
-        : ValidationResultStatus.VALID;
-
-      // SchemaValidationError is read only so we need to copy data to a structure without those restrictions
-      const validationErrors: PDCMSchemaValidationError[] = validationResults.validationErrors.map((x: any) =>
-        this.#transformLecternError(x, dictionary, schemaName, x.fieldName)
-      // ({
-      //   errorType: this.#getMappedErrorType(x.errorType),
-      //   index: x.index,
-      //   fieldName: x.fieldName,
-      //   info: x.info,
-      //   message: this.#getMappedErrorText(x.errorType)
-      // })
-      );
-
-      sheetValidationResult.status = sheetValidationStatus;
-      sheetValidationResult.result = validationErrors;
-    } catch (error) {
-      throw new BadRequestException(error as string);
-    }
+    sheetValidationResult.status = sheetValidationStatus;
+    sheetValidationResult.result = validationErrors;
 
     return sheetValidationResult;
   }
 
-  getSchemaNameFromFileName (fileName: string): string {
+
+  getSchemaNameFromFileName(fileName: string): string {
     const idx = fileName.indexOf('.');
     return fileName.slice(0, idx);
   }
 
-  #buildReport (
+  #buildReport(
     fileName: string,
     dictionaryName: string,
     dictionaryVersion: string,
@@ -138,13 +148,13 @@ class ValidatorService {
     return validationReport;
   }
 
-  #getUnifiedStatus (sheetsValidationResults: SheetValidationResult[]): ValidationResultStatus {
+  #getUnifiedStatus(sheetsValidationResults: SheetValidationResult[]): ValidationResultStatus {
     const anyInvalid: boolean = sheetsValidationResults
       .some((x) => x.status !== ValidationResultStatus.VALID);
     return anyInvalid ? ValidationResultStatus.INVALID : ValidationResultStatus.VALID;
   }
 
-  #validateSchemasAndSheetsMatch (dictionary: SchemasDictionary, processedFile: ProcessedFile): void {
+  #validateSchemasAndSheetsMatch(dictionary: SchemasDictionary, processedFile: ProcessedFile): void {
     const schemas = dictionary.schemas.map(e => e.name);
     const sheets = Array.from(processedFile.data.keys());
     // const missingSchemas = difference(schemas, sheets);
@@ -158,16 +168,16 @@ class ValidatorService {
   }
 
   // Transform Lectern Error types into customized error types for PDCM
-  #getMappedErrorType (errorType: string): string {
+  #getMappedErrorType(errorType: string): string {
     return errorTypeMapping.get(errorType) ?? errorType;
   }
 
   // Transform Lectern Error text into customized error types for PDCM
-  #getMappedErrorText (errorType: string): string {
+  #getMappedErrorText(errorType: string): string {
     return errorTextMapping.get(errorType) ?? errorType;
   }
 
-  #getExtendedInfo (originalError: any, dictionary: SchemasDictionary, schemaName: string, fieldName: string): Record<string, any> {
+  #getExtendedInfo(originalError: any, dictionary: SchemasDictionary, schemaName: string, fieldName: string): Record<string, any> {
     const extendedInfo = { ...originalError.info };
     if (originalError.errorType !== 'UNRECOGNIZED_FIELD') {
       const fieldDefinition: FieldDefinition = dictionaryService.getFieldDefinition(dictionary, schemaName, fieldName);
@@ -181,7 +191,7 @@ class ValidatorService {
     return extendedInfo;
   }
 
-  #transformLecternError (originalError: any, dictionary: SchemasDictionary, schemaName: string, fieldName: string): PDCMSchemaValidationError {
+  #transformLecternError(originalError: any, dictionary: SchemasDictionary, schemaName: string, fieldName: string): PDCMSchemaValidationError {
     const newErrorType: string = this.#getMappedErrorType(originalError.errorType);
     const newInfo: Record<string, any> = this.#getExtendedInfo(originalError, dictionary, schemaName, fieldName);
     const newMessage: string = this.#getMappedErrorText(originalError.errorType);
