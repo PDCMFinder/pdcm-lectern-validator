@@ -19,7 +19,7 @@
     "cov:report": "nyc report --reporter html --reporter lcov --report-dir ./coverage/summary"
   },
   "dependencies": {
-    "@overturebio-stack/lectern-client": "^1.4.0",
+    "@overturebio-stack/lectern-client": "^1.5.0",
     "cookie-parser": "~1.4.4",
     "cors": "2.8.5",
     "debug": "~2.6.9",

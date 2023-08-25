@@ -1473,10 +1473,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@overturebio-stack/lectern-client@^1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@overturebio-stack/lectern-client/-/lectern-client-1.4.0.tgz#825d1d67f3d896e0fbd1ccb8dcf8f72e03508138"
-  integrity sha512-+T16UkGEOvAkt/QwfQwjO1C/kUzA71r9pjBfn/yymCBmpA5rabflMAYB8HjcVsCltoqamClMQiNAV1K+iaJOLA==
+"@overturebio-stack/lectern-client@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@overturebio-stack/lectern-client/-/lectern-client-1.5.0.tgz#6926e07fe167f9c8a468ef29a4a7f878bc1650fd"
+  integrity sha512-WYLwlWE09yR/SG6FqhAbbFynY3+ViclVbGJO0PO6Uspe5Pe7YKOfzWO9udlO4f40y+ZnwDlzkaJgMsk/AocyhQ==
   dependencies:
     cd "^0.3.3"
     deep-freeze "^0.0.1"
