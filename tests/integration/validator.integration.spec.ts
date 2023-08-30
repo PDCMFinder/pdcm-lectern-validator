@@ -494,4 +494,79 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
     expect(resultAsJSON['sheetsValidationResults']).toEqual(sheetsValidationResults);
   })
 
+  it('should report an error if unique key restriction is violated', async () => {
+    const filePath = `${__dirname}/test_files/unique_key_violated.xlsx`;
+
+    mockDictionaryResponse();
+
+    // Load the lectern dictionary. It would use the mock http server so the returned dictionary would be taken from a file.
+    await dictionaryService.instance().loadValidationDictionary("schemaName", '1.0');
+
+    const response = await request(app).post('/validation/upload-excel').attach('file', filePath);
+    const resultAsJSON = JSON.parse(response.text);
+
+    const sheetsValidationResults = [
+      {
+        "sheetName": "patient",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "patient_sample",
+        "status": "invalid",
+        "result": [
+          {
+            errorType: "Unique key violation",
+            fieldName: "sample_id",
+            index: 0,
+            info: {
+              "format": "#/fields/format/ALPHANUMERIC",
+              "uniqueKeyFields": ["sample_id"],
+              "value": {
+                "sample_id": "CRC0228PRH0000000000D01000",
+              },
+            },
+            message: "Key sample_id: CRC0228PRH0000000000D01000 must be unique.",
+          },
+          {
+            errorType: "Unique key violation",
+            fieldName: "sample_id",
+            index: 1,
+            info: {
+              "format": "#/fields/format/ALPHANUMERIC",
+              "uniqueKeyFields": ["sample_id"],
+              "value": {
+                "sample_id": "CRC0228PRH0000000000D01000",
+              },
+            },
+            message: "Key sample_id: CRC0228PRH0000000000D01000 must be unique.",
+          },
+        ]
+      },
+      {
+        "sheetName": "pdx_model",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "model_validation",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "cell_model",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "sharing",
+        "status": "valid",
+        "result": []
+      }
+    ]
+
+    expect(response.statusCode).toEqual(StatusCodes.OK);
+    expect(resultAsJSON['sheetsValidationResults']).toEqual(sheetsValidationResults);
+  })
+
 })
