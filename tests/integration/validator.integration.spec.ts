@@ -54,7 +54,7 @@ const mockDictionaryResponse = () => {
 describe('Server configuration errors', () => {
 
   it('should throw error when no dictionary service has not been correctly initialized', async () => {
-    const filePath = `${__dirname}/test_files/schema_ok_data_empty.xlsx`;
+    const filePath = `${__dirname}/test_files/schema_ok.xlsx`;
     const mockExit = jest.spyOn(process, 'exit')
       .mockImplementation((number) => { throw new Error('process.exit: ' + number); });
 
@@ -84,7 +84,7 @@ describe('Server configuration errors', () => {
   })
 
   it('should fail when dictionary does not exist', async () => {
-    const filePath = `${__dirname}/test_files/schema_ok_data_empty.xlsx`;
+    const filePath = `${__dirname}/test_files/schema_ok.xlsx`;
     // Set a dictionary url but not mocking a response from Lectern, so the dictionary would be undefined.
     dictionaryService.create(mockedDictionaryServiceUrl);
 
@@ -143,7 +143,7 @@ describe('Request related errors', () => {
 
 describe('Happy path scenarios', () => {
   it('should pass when using default dictionary and a valid file', async () => {
-    const filePath = `${__dirname}/test_files/schema_ok_data_empty.xlsx`;
+    const filePath = `${__dirname}/test_files/schema_ok.xlsx`;
 
     mockDictionaryResponse();
 
@@ -212,9 +212,9 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
           {
             errorType: "Missing required field",
             fieldName: "patient_id",
-            index: 2,
+            index: 1,
             info: {
-              format: "Alphanumeric"
+              format: "#/fields/format/ALPHANUMERIC"
             },
             message: "A required field is missing from the input data.",
           },
@@ -270,7 +270,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
           {
             errorType: "Value error",
             fieldName: "sex",
-            index: 2,
+            index: 1,
             info: {
               format: "Any of the following values: [male, female, other, not collected, not provided]",
               value: [
@@ -405,6 +405,68 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
         "sheetName": "patient_sample",
         "status": "valid",
         "result": []
+      },
+      {
+        "sheetName": "pdx_model",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "model_validation",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "cell_model",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "sharing",
+        "status": "valid",
+        "result": []
+      }
+    ]
+
+    expect(response.statusCode).toEqual(StatusCodes.OK);
+    expect(resultAsJSON['sheetsValidationResults']).toEqual(sheetsValidationResults);
+  })
+
+  it('should report an error if foreign key restriction is violated', async () => {
+    const filePath = `${__dirname}/test_files/foreign_key_violated.xlsx`;
+
+    mockDictionaryResponse();
+
+    // Load the lectern dictionary. It would use the mock http server so the returned dictionary would be taken from a file.
+    await dictionaryService.instance().loadValidationDictionary("schemaName", '1.0');
+
+    const response = await request(app).post('/validation/upload-excel').attach('file', filePath);
+    const resultAsJSON = JSON.parse(response.text);
+
+    const sheetsValidationResults = [
+      {
+        "sheetName": "patient",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "patient_sample",
+        "status": "invalid",
+        "result": [
+          {
+            errorType: "Foreign key violation",
+            fieldName: "patient_id",
+            index: 1,
+            info: {
+              "foreignSchema": "patient",
+              "format": "#/fields/format/ALPHANUMERIC",
+              "value": {
+                "patient_id": "A0088_X",
+              },
+            },
+            message: "Record violates foreign key restriction defined for field(s) patient_id. Key patient_id: A0088_X is not present in schema patient.",
+          },
+        ]
       },
       {
         "sheetName": "pdx_model",

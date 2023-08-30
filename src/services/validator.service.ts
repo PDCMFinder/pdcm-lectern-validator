@@ -36,9 +36,11 @@ const errorTypeMapping = new Map<string, string>([
   ['MISSING_REQUIRED_FIELD', 'Missing required field'],
   ['INVALID_BY_REGEX', 'Invalid format'],
   ['INVALID_ENUM_VALUE', 'Value error'],
-  ['UNRECOGNIZED_FIELD', 'Unrecognized field']
+  ['UNRECOGNIZED_FIELD', 'Unrecognized field'],
+  ['INVALID_BY_FOREIGN_KEY', 'Foreign key violation']
 ]);
 
+// This allows to override error messages from Lectern. If not entry is found, the original error message will be used in the report.
 const errorTextMapping = new Map<string, string>([
   ['MISSING_REQUIRED_FIELD', 'A required field is missing from the input data.'],
   ['INVALID_BY_REGEX', 'The field\'s value does not comply with the defined regular expression pattern.'],
@@ -173,8 +175,8 @@ class ValidatorService {
   }
 
   // Transform Lectern Error text into customized error types for PDCM
-  #getMappedErrorText(errorType: string): string {
-    return errorTextMapping.get(errorType) ?? errorType;
+  #getMappedErrorText(originalError: any): string {
+    return errorTextMapping.get(originalError.errorType) ?? originalError.message;
   }
 
   #getExtendedInfo(originalError: any, dictionary: SchemasDictionary, schemaName: string, fieldName: string): Record<string, any> {
@@ -194,7 +196,7 @@ class ValidatorService {
   #transformLecternError(originalError: any, dictionary: SchemasDictionary, schemaName: string, fieldName: string): PDCMSchemaValidationError {
     const newErrorType: string = this.#getMappedErrorType(originalError.errorType);
     const newInfo: Record<string, any> = this.#getExtendedInfo(originalError, dictionary, schemaName, fieldName);
-    const newMessage: string = this.#getMappedErrorText(originalError.errorType);
+    const newMessage: string = this.#getMappedErrorText(originalError);
 
     const pdcmError: PDCMSchemaValidationError = {
       errorType: newErrorType,
