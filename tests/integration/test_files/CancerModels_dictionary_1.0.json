@@ -1,6 +1,6 @@
 [
     {
-        "_id": "64ef049838cb1108a5e0da0e",
+        "_id": "64f0564ccb3feeaeec448872",
         "name": "CancerModels_Dictionary",
         "version": "1.0",
         "schemas": [
@@ -19,7 +19,8 @@
                         "valueType": "string",
                         "restrictions": {
                             "required": true,
-                            "regex": "^[\\w\\d\\s/._~-]+$"
+                            "regex": "^[\\w\\d\\s/._~-]+$",
+                            "unique": true
                         }
                     },
                     {
@@ -106,12 +107,7 @@
                             "regex": "^([\\d\\s\\.,-]+(months)?|(N|n)ot (P|p)rovided|(N|n)ot (C|c)ollected)$"
                         }
                     }
-                ],
-                "restrictions": {
-                    "uniqueKey": [
-                        "patient_id"
-                    ]
-                }
+                ]
             },
             {
                 "name": "patient_sample",
@@ -409,10 +405,21 @@
                                     "foreign": "patient_id"
                                 }
                             ]
+                        },
+                        {
+                            "schema": "sharing",
+                            "mappings": [
+                                {
+                                    "local": "model_id",
+                                    "foreign": "model_id"
+                                }
+                            ]
                         }
                     ],
                     "uniqueKey": [
-                        "sample_id"
+                        "patient_id",
+                        "sample_id",
+                        "model_id"
                     ]
                 }
             },
@@ -431,13 +438,9 @@
                         "valueType": "string",
                         "restrictions": {
                             "required": true,
-                            "regex": "^[\\w\\d\\s/._~-]+$"
+                            "regex": "^[\\w\\d\\s/._~-]+$",
+                            "unique": true
                         }
-                    },
-                    {
-                        "name": "patient_sample_model_id",
-                        "description": "Refernce to model_id in schema patient_sample",
-                        "valueType": "string"
                     },
                     {
                         "name": "accessibility",
@@ -531,7 +534,7 @@
                             "schema": "patient_sample",
                             "mappings": [
                                 {
-                                    "local": "patient_sample_model_id",
+                                    "local": "model_id",
                                     "foreign": "model_id"
                                 }
                             ]
@@ -554,7 +557,8 @@
                         "valueType": "string",
                         "restrictions": {
                             "required": true,
-                            "regex": "^[\\w\\d\\s/._~-]+$"
+                            "regex": "^[\\w\\d\\s/._~-]+$",
+                            "unique": true
                         }
                     },
                     {
@@ -666,8 +670,16 @@
                     }
                 ],
                 "restrictions": {
-                    "uniqueKey": [
-                        "model_id"
+                    "foreignKey": [
+                        {
+                            "schema": "patient_sample",
+                            "mappings": [
+                                {
+                                    "local": "model_id",
+                                    "foreign": "model_id"
+                                }
+                            ]
+                        }
                     ]
                 }
             },
@@ -771,7 +783,8 @@
                         "valueType": "string",
                         "restrictions": {
                             "required": true,
-                            "regex": "^[\\w\\d\\s/._~-]+$"
+                            "regex": "^[\\w\\d\\s/._~-]+$",
+                            "unique": true
                         }
                     },
                     {
@@ -901,8 +914,16 @@
                     }
                 ],
                 "restrictions": {
-                    "uniqueKey": [
-                        "model_id"
+                    "foreignKey": [
+                        {
+                            "schema": "patient_sample",
+                            "mappings": [
+                                {
+                                    "local": "model_id",
+                                    "foreign": "model_id"
+                                }
+                            ]
+                        }
                     ]
                 }
             }

@@ -517,29 +517,37 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
         "result": [
           {
             errorType: "Unique key violation",
-            fieldName: "sample_id",
-            index: 0,
+            fieldName: "patient_id, sample_id, model_id",
+            index: 1,
             info: {
-              "format": "#/fields/format/ALPHANUMERIC",
-              "uniqueKeyFields": ["sample_id"],
               "value": {
-                "sample_id": "CRC0228PRH0000000000D01000",
+                "patient_id": "A0088",
+                "sample_id": "RH0000000000D01000",
+                "model_id": "CRC0228PRaS"
               },
-            },
-            message: "Key sample_id: CRC0228PRH0000000000D01000 must be unique.",
+              "uniqueKeyFields": [
+                "patient_id",
+                "sample_id",
+                "model_id"
+              ]},
+            message: "Key patient_id: A0088, sample_id: RH0000000000D01000, model_id: CRC0228PRaS must be unique.",
           },
           {
             errorType: "Unique key violation",
-            fieldName: "sample_id",
-            index: 1,
+            fieldName: "patient_id, sample_id, model_id",
+            index: 2,
             info: {
-              "format": "#/fields/format/ALPHANUMERIC",
-              "uniqueKeyFields": ["sample_id"],
               "value": {
-                "sample_id": "CRC0228PRH0000000000D01000",
+                "patient_id": "A0088",
+                "sample_id": "RH0000000000D01000",
+                "model_id": "CRC0228PRaS"
               },
-            },
-            message: "Key sample_id: CRC0228PRH0000000000D01000 must be unique.",
+              "uniqueKeyFields": [
+                "patient_id",
+                "sample_id",
+                "model_id"
+              ]},
+            message: "Key patient_id: A0088, sample_id: RH0000000000D01000, model_id: CRC0228PRaS must be unique.",
           },
         ]
       },

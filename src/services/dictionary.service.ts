@@ -109,10 +109,14 @@ export function instance (): DictionaryService {
   return dictionaryService;
 }
 
-export function getFieldDefinition (dictionary: SchemasDictionary, schemaName: string, fieldName: string): FieldDefinition {
+export function getFieldDefinition (dictionary: SchemasDictionary, schemaName: string, fieldName: string): FieldDefinition | undefined {
   const schema: SchemaDefinition | undefined = dictionary.schemas.find(x => x.name === schemaName);
   if (schema === undefined) {
     throw new ConfigurationException(`Schema ${schemaName} does not exist.`);
+  }
+  // List of fields are not processed
+  if (fieldName.includes(',')) {
+    return undefined;
   }
   const field: FieldDefinition | undefined = schema.fields.find(x => x.name === fieldName);
   if (field === undefined) {

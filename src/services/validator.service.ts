@@ -183,9 +183,10 @@ class ValidatorService {
   #getExtendedInfo(originalError: any, dictionary: SchemasDictionary, schemaName: string, fieldName: string): Record<string, any> {
     const extendedInfo = { ...originalError.info };
     if (originalError.errorType !== 'UNRECOGNIZED_FIELD') {
-      const fieldDefinition: FieldDefinition = dictionaryService.getFieldDefinition(dictionary, schemaName, fieldName);
+      
+      const fieldDefinition: FieldDefinition | undefined = dictionaryService.getFieldDefinition(dictionary, schemaName, fieldName);
       // Needs to be defined as any because format is not part of the meta definition
-      const meta: any = fieldDefinition.meta;
+      const meta: any = fieldDefinition?.meta;
       if (meta !== undefined) {
         const format = meta.format;
         extendedInfo.format = format;
