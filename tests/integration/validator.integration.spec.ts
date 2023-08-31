@@ -212,7 +212,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
           {
             errorType: "Missing required field",
             fieldName: "patient_id",
-            index: 1,
+            index: 3,
             info: {
               format: "#/fields/format/ALPHANUMERIC"
             },
@@ -270,7 +270,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
           {
             errorType: "Value error",
             fieldName: "sex",
-            index: 1,
+            index: 3,
             info: {
               format: "Any of the following values: [male, female, other, not collected, not provided]",
               value: [
@@ -357,7 +357,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
           {
             errorType: "Invalid format",
             fieldName: "email",
-            index: 1,
+            index: 3,
             info: {
               examples: "j.doe@example.com",
               regex: "^(([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)+,?\\s?)*|(N|n)ot (P|p)rovided|(N|n)ot (C|c)ollected)$",
@@ -395,7 +395,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
           {
             errorType: "Unrecognized field",
             fieldName: "field_x",
-            index: 0,
+            index: 2,
             info: {},
             message: "The submitted data has a field which is not in the schema.",
           },
@@ -451,7 +451,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
 
           {
             "errorType": "Value must be unique",
-            "index": 0,
+            "index": 2,
             "fieldName": "patient_id",
             "info": {
               "value": "A0088",
@@ -461,7 +461,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
           },
           {
             "errorType": "Value must be unique",
-            "index": 2,
+            "index": 4,
             "fieldName": "patient_id",
             "info": {
               "value": "A0088",
@@ -527,7 +527,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
           {
             errorType: "Foreign key violation",
             fieldName: "patient_id",
-            index: 1,
+            index: 3,
             info: {
               "foreignSchema": "patient",
               "format": "#/fields/format/ALPHANUMERIC",
@@ -589,7 +589,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
           {
             errorType: "Unique key violation",
             fieldName: "patient_id, sample_id, model_id",
-            index: 1,
+            index: 3,
             info: {
               "value": {
                 "patient_id": "A0088",
@@ -607,7 +607,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
           {
             errorType: "Unique key violation",
             fieldName: "patient_id, sample_id, model_id",
-            index: 2,
+            index: 4,
             info: {
               "value": {
                 "patient_id": "A0088",
@@ -668,7 +668,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
         "result": [
           {
             "errorType": "Value error",
-            "index": 2,
+            "index": 4,
             "fieldName": "sex",
             "info": {
               "value": [
@@ -680,7 +680,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
           },
           {
             "errorType": "Value must be unique",
-            "index": 1,
+            "index": 3,
             "fieldName": "patient_id",
             "info": {
               "value": "SADASD",
@@ -690,7 +690,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
           },
           {
             "errorType": "Value must be unique",
-            "index": 2,
+            "index": 4,
             "fieldName": "patient_id",
             "info": {
               "value": "SADASD",
@@ -704,24 +704,6 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
         "sheetName": "patient_sample",
         "status": "invalid",
         "result": [
-          {
-            "errorType": "Unique key violation",
-            "index": 1,
-            "fieldName": "patient_id, sample_id, model_id",
-            "info": {
-              "value": {
-                "patient_id": "A0088",
-                "sample_id": "RH0000000000D01000",
-                "model_id": "CRC0228PRaS"
-              },
-              "uniqueKeyFields": [
-                "patient_id",
-                "sample_id",
-                "model_id"
-              ]
-            },
-            "message": "Key patient_id: A0088, sample_id: RH0000000000D01000, model_id: CRC0228PRaS must be unique."
-          },
           {
             "errorType": "Unique key violation",
             "index": 3,
@@ -741,8 +723,26 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
             "message": "Key patient_id: A0088, sample_id: RH0000000000D01000, model_id: CRC0228PRaS must be unique."
           },
           {
+            "errorType": "Unique key violation",
+            "index": 5,
+            "fieldName": "patient_id, sample_id, model_id",
+            "info": {
+              "value": {
+                "patient_id": "A0088",
+                "sample_id": "RH0000000000D01000",
+                "model_id": "CRC0228PRaS"
+              },
+              "uniqueKeyFields": [
+                "patient_id",
+                "sample_id",
+                "model_id"
+              ]
+            },
+            "message": "Key patient_id: A0088, sample_id: RH0000000000D01000, model_id: CRC0228PRaS must be unique."
+          },
+          {
             "errorType": "Foreign key violation",
-            "index": 2,
+            "index": 4,
             "fieldName": "patient_id",
             "info": {
               "value": {
@@ -761,7 +761,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
         "result": [
           {
             "errorType": "Missing required field",
-            "index": 1,
+            "index": 3,
             "fieldName": "host_strain_name",
             "info": {
               "format": "Mouse strain name"
@@ -786,7 +786,7 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
         "result": [
           {
             "errorType": "Invalid format",
-            "index": 1,
+            "index": 3,
             "fieldName": "email",
             "info": {
               "value": [

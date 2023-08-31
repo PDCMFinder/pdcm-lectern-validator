@@ -22,7 +22,12 @@ export enum ValidationResultStatus {
 
 export interface ProcessedFile {
   fileName: string
-  data: Map<string, any>
+  data: Map<string, SheetData>
+}
+
+export interface SheetData {
+  rows: any,
+  lineNumberOffset: number
 }
 
 export interface PDCMSchemaValidationError {

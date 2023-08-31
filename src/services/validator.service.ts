@@ -22,7 +22,7 @@ import { type FieldDefinition, type SchemasDictionary } from '@overturebio-stack
 import FileProcessor from '../utils/fileProcessor';
 import * as dictionaryService from './dictionary.service';
 import {
-  type ProcessedFile, type SheetValidationResult, type ValidationReport, ValidationResultStatus, type PDCMSchemaValidationError
+  type ProcessedFile, type SheetValidationResult, type ValidationReport, ValidationResultStatus, type PDCMSchemaValidationError, SheetData
 } from '@/models/validation.model';
 import { ConfigurationException } from '@/exceptions/configuration.exception';
 import { BadRequestException } from '@/exceptions/bad-request.exception';
@@ -70,13 +70,7 @@ class ValidatorService {
 
     this.#validateSchemasAndSheetsMatch(validationDictionary, processedFile);
 
-    const recordsBySchema: Record<string, any> = {};
-
-    processedFile.data.forEach((value, key) => {
-      recordsBySchema[key] = value;
-
-    });
-    const sheetsValidationResults = this.#processData(validationDictionary, recordsBySchema);
+    const sheetsValidationResults = this.#processData(validationDictionary, processedFile.data);
 
     const validationReport: ValidationReport = this.#buildReport(processedFile.fileName, validationDictionary.name, validationDictionary.version, sheetsValidationResults);
 
@@ -88,24 +82,32 @@ class ValidatorService {
  * @param dictionary Dictionary to use for the validations
  * @param data Record with the data to validate. Contains all the records per schema/sheet.
  */
-  #processData(dictionary: SchemasDictionary, data: Record<string, any>): SheetValidationResult[] {
-    const sheetsValidationResults: SheetValidationResult[] = []
+  #processData(dictionary: SchemasDictionary, data: Map<string, SheetData>): SheetValidationResult[] {
+    const sheetsValidationResults: SheetValidationResult[] = [];
+
+    const recordsBySchema: Record<string, any> = {};
+
+    for (let [key, value] of data) {
+      recordsBySchema[key] = value.rows;
+    }
 
     // Call the logic in Lectern to validate results, which are retrieved as a Record, where the key is the schema and
     // the value the validation result for that schema
-    const lecternValidationResults = lecternSchemaFunctions.processSchemas(dictionary, data);
+    const lecternValidationResults = lecternSchemaFunctions.processSchemas(dictionary, recordsBySchema);
 
     // Obtain the results per schema
     Object.keys(lecternValidationResults).forEach(schema => {
       const schemaResults = lecternValidationResults[schema];
+      const lineNumberOffset = data.get(schema)?.lineNumberOffset ?? 0;      
 
-      const sheetValidationResult = this.#processSchemaValidationResult(dictionary, schema, schemaResults);
+      const sheetValidationResult = this.#processSchemaValidationResult(dictionary, schema, schemaResults, lineNumberOffset);
       sheetsValidationResults.push(sheetValidationResult);
     })
     return sheetsValidationResults;
   }
 
-  #processSchemaValidationResult(dictionary: SchemasDictionary, schemaName: string, schemaValidationResults: any): SheetValidationResult {
+  #processSchemaValidationResult(
+    dictionary: SchemasDictionary, schemaName: string, schemaValidationResults: any, lineNumberOffset: number): SheetValidationResult {
 
     const sheetValidationResult: SheetValidationResult = {
       sheetName: schemaName
@@ -117,7 +119,7 @@ class ValidatorService {
 
     // SchemaValidationError is read only so we need to copy data to a structure without those restrictions
     const validationErrors: PDCMSchemaValidationError[] = schemaValidationResults.validationErrors.map((x: any) =>
-      this.#transformLecternError(x, dictionary, schemaName, x.fieldName)
+      this.#transformLecternError(x, dictionary, schemaName, x.fieldName, lineNumberOffset)
     );
 
     sheetValidationResult.status = sheetValidationStatus;
@@ -196,14 +198,19 @@ class ValidatorService {
     return extendedInfo;
   }
 
-  #transformLecternError(originalError: any, dictionary: SchemasDictionary, schemaName: string, fieldName: string): PDCMSchemaValidationError {
+  #transformLecternError(
+    originalError: any,
+    dictionary: SchemasDictionary,
+    schemaName: string,
+    fieldName: string,
+    lineNumberOffset: number): PDCMSchemaValidationError {
     const newErrorType: string = this.#getMappedErrorType(originalError.errorType);
     const newInfo: Record<string, any> = this.#getExtendedInfo(originalError, dictionary, schemaName, fieldName);
     const newMessage: string = this.#getMappedErrorText(originalError);
 
     const pdcmError: PDCMSchemaValidationError = {
       errorType: newErrorType,
-      index: originalError.index,
+      index: originalError.index + lineNumberOffset,
       fieldName: originalError.fieldName,
       info: newInfo,
       message: newMessage
