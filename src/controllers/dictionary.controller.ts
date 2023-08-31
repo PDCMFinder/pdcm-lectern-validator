@@ -14,11 +14,14 @@
  * License.
  ****************************************************************************** */
 
-import { type NextFunction, type Request, type Response } from 'express'
-import * as dictionaryService from '../services/dictionary.service'
-import asyncHandler from 'express-async-handler'
+import { type NextFunction, type Request, type Response } from 'express';
+import * as dictionaryService from '../services/dictionary.service';
+import asyncHandler from 'express-async-handler';
 
+/**
+ * Returns the dictionary that is being used for the validations
+ */
 export const getDictionary = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  const dictionary = dictionaryService.instance().getLatestVersionDictionary()
-  res.status(201).json(dictionary)
-})
+  const dictionary = dictionaryService.instance().getLatestVersionDictionary();
+  res.status(201).json(dictionary);
+});

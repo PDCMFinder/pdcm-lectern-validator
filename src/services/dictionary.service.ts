@@ -17,21 +17,22 @@
 import {
   type entities as dictionaryEntities,
   restClient as dictionaryRestClient
-} from '@overturebio-stack/lectern-client'
+} from '@overturebio-stack/lectern-client';
 
-import { getLogger } from '@/utils/loggers'
-import { ConfigurationException } from '@/exceptions/configuration.exception'
+import { ConfigurationException } from '@/exceptions/configuration.exception';
+import getLogger from '@/lib/logger';
+import { type FieldDefinition, type SchemaDefinition, type SchemasDictionary } from '@overturebio-stack/lectern-client/lib/schema-entities';
 
-const logger = getLogger('DICTIONARY_SERVICE')
+const logger = getLogger('DICTIONARY_SERVICE');
 
-let dictionaryService: DictionaryService
+let dictionaryService: DictionaryService;
 
-class DictionaryService {
-  private latestVersionDictionary: dictionaryEntities.SchemasDictionary | undefined = undefined
+export class DictionaryService {
+  private latestVersionDictionary: dictionaryEntities.SchemasDictionary | undefined = undefined;
 
-  private validationDictionaryName = ''
+  private validationDictionaryName = '';
 
-  private validationDictionaryVersion = ''
+  private validationDictionaryVersion = '';
 
   constructor (private readonly dictionaryServiceUrl: string) { }
 
@@ -43,19 +44,25 @@ class DictionaryService {
    */
   loadValidationDictionary = async (name: string, version: string): Promise<dictionaryEntities.SchemasDictionary> => {
     try {
-      logger.info(`Fetching validation dictionary. Name: ${name} - Version: ${version}`)
-      const validationDictionary = await dictionaryRestClient.fetchSchema(this.dictionaryServiceUrl, name, version)
-      logger.info('Dictionary fetched successfully')
-      this.latestVersionDictionary = validationDictionary
+      logger.info(`Fetching validation dictionary. Name: ${name} - Version: ${version}`);
+      const validationDictionary = await dictionaryRestClient.fetchSchema(this.dictionaryServiceUrl, name, version);
+      this.latestVersionDictionary = validationDictionary;
+
+      if (validationDictionary === undefined) {
+        throw new ConfigurationException(`Dictionary named [${name}] with version [${version}] does not exist.`);
+      }
+      logger.info('Dictionary fetched successfully');
       // Sets the version used for reference
-      this.setValidationDictionaryInformation(name, version)
-      return validationDictionary
-    } catch (err) {
-      let errorMessage = `Could not fetch dictionary from ${this.dictionaryServiceUrl}.`
-      errorMessage += ` Check that Lectern is running and that a dictionary named [${name}] with version ${version} exists.`
-      throw new ConfigurationException(errorMessage)
+      this.setValidationDictionaryInformation(name, version);
+      return validationDictionary;
+    } catch (error) {
+      if (error instanceof ConfigurationException) {
+        throw error;
+      }
+      const errorMessage = `Could not fetch dictionary from ${this.dictionaryServiceUrl}. Check that Lectern is running.`;
+      throw new ConfigurationException(errorMessage);
     }
-  }
+  };
 
   loadSchemaByVersion = async (
     name: string,
@@ -66,43 +73,59 @@ class DictionaryService {
         this.dictionaryServiceUrl,
         name,
         version
-      )
-      logger.info('Schema loaded...')
-      logger.info(newSchema)
-      this.latestVersionDictionary = newSchema
-      return newSchema
+      );
+      logger.info('Schema loaded...');
+      logger.info(newSchema);
+      this.latestVersionDictionary = newSchema;
+      return newSchema;
     } catch (err) {
-      logger.error('Failed to fetch schema: ', err)
-      throw new Error(`Failed to fetch schema: ${err as string}`)
+      logger.error('Failed to fetch schema: ', err);
+      throw new ConfigurationException(`Failed to fetch schema: ${err as string}`);
     }
-  }
+  };
 
   setValidationDictionaryInformation (dictionaryName: string, dictionaryVersion: string): void {
-    this.validationDictionaryName = dictionaryName
-    this.validationDictionaryVersion = dictionaryVersion
+    this.validationDictionaryName = dictionaryName;
+    this.validationDictionaryVersion = dictionaryVersion;
   }
 
   getLatestVersionDictionary (): dictionaryEntities.SchemasDictionary | undefined {
-    return this.latestVersionDictionary
+    return this.latestVersionDictionary;
   }
 
   getValidationDictionaryName (): string {
-    return this.validationDictionaryName
+    return this.validationDictionaryName;
   }
 
   getValidationDictionaryVersion (): string {
-    return this.validationDictionaryVersion
+    return this.validationDictionaryVersion;
   }
 }
 
 export function instance (): DictionaryService {
   if (dictionaryService === undefined) {
-    throw new Error('Validator Service not initialized, you should call create first')
+    throw new ConfigurationException('Validator Service not initialized, you should call create first.');
   }
-  return dictionaryService
+  return dictionaryService;
+}
+
+export function getFieldDefinition (dictionary: SchemasDictionary, schemaName: string, fieldName: string): FieldDefinition | undefined {
+  const schema: SchemaDefinition | undefined = dictionary.schemas.find(x => x.name === schemaName);
+  if (schema === undefined) {
+    throw new ConfigurationException(`Schema ${schemaName} does not exist.`);
+  }
+  // List of fields are not processed
+  if (fieldName.includes(',')) {
+    return undefined;
+  }
+  const field: FieldDefinition | undefined = schema.fields.find(x => x.name === fieldName);
+  if (field === undefined) {
+    throw new ConfigurationException(`Field ${fieldName} does not exist in schema ${schemaName}.`);
+  }
+  return field;
 }
 
 export function create (schemaServiceUrl: string): void {
-  logger.info('Creating service with url', schemaServiceUrl)
-  dictionaryService = new DictionaryService(schemaServiceUrl)
+  logger.info(`Creating service with url ${schemaServiceUrl}`);
+  dictionaryService = new DictionaryService(schemaServiceUrl);
 }

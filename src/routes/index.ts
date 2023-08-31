@@ -14,13 +14,13 @@
  * License.
  ****************************************************************************** */
 
-import express from 'express'
+import express from 'express';
 
-const router = express.Router()
+const router = express.Router();
 
 /* GET home page. */
 router.get('/', (_req, res, _next) => {
-  res.render('index', { title: 'PDCM validator using Lectern' })
-})
+  res.render('index', { title: 'PDCM validator using Lectern' });
+});
 
-export default router
+export default router;

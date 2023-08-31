@@ -14,11 +14,8 @@
  * License.
  ****************************************************************************** */
 
-import { type ProcessedFile } from '@/models/validation.model'
-import { getLogger } from '@/utils/loggers'
-import XLSX from 'xlsx'
-
-const logger = getLogger('fileProcessor')
+import { type ProcessedFile } from '@/models/validation.model';
+import XLSX from 'xlsx';
 
 class FileProcessor {
   /**
@@ -27,37 +24,37 @@ class FileProcessor {
      * @returns A ProcessedFile object with the sheets and rows as a dictionary.
      */
   public async processExcelFile (file: Express.Multer.File): Promise<ProcessedFile> {
-    const resultMap = new Map<string, any>()
-    const opts = { raw: false }
+    const resultMap = new Map<string, any>();
+    const opts = { raw: false };
 
-    const wb = XLSX.readFile(file.path)
-    const sheets = wb.SheetNames
-    logger.info('Sheets:', sheets)
+    const wb = XLSX.readFile(file.path);
+    const sheets = wb.SheetNames;
+
     sheets.forEach((sheet: any) => {
-      const data = XLSX.utils.sheet_to_json(wb.Sheets[sheet], opts)
-      const dataWithoutComments = removeComments(data)
-      resultMap.set(sheet, dataWithoutComments)
-    })
+      const data = XLSX.utils.sheet_to_json(wb.Sheets[sheet], opts);
+      const dataWithoutComments = removeComments(data);
+      resultMap.set(sheet, dataWithoutComments);
+    });
 
     const processedFile: ProcessedFile = {
       fileName: file.originalname,
       data: resultMap
-    }
+    };
 
-    return await Promise.resolve(processedFile)
+    return await Promise.resolve(processedFile);
   }
 }
 
 const removeComments = (data: any[]): any[] => {
-  return data.filter(record => !(shouldIgnoreRecord(record)))
-}
+  return data.filter(record => !(shouldIgnoreRecord(record)));
+};
 
 const shouldIgnoreRecord = (record: any): boolean => {
   if ('Field' in record) {
-    const valueAsString = record.Field as string
-    return valueAsString.startsWith('#')
+    const valueAsString = record.Field as string;
+    return valueAsString.startsWith('#');
   }
-  return false
-}
+  return false;
+};
 
-export default FileProcessor
+export default FileProcessor;

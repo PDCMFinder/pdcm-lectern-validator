@@ -14,13 +14,13 @@
  * License.
  ****************************************************************************** */
 
-import { type StatusCodes } from 'http-status-codes'
+import { type StatusCodes } from 'http-status-codes';
 
 export class RequestExeption extends Error {
-  statusCode: StatusCodes
+  statusCode: StatusCodes;
 
   constructor (statusCode: StatusCodes, message: string) {
-    super(message)
-    this.statusCode = statusCode
+    super(message);
+    this.statusCode = statusCode;
   }
 }

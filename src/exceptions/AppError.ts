@@ -14,25 +14,32 @@
  * License.
  ****************************************************************************** */
 
-import path from 'path'
-import log4js, { configure } from 'log4js'
+import { type StatusCodes } from 'http-status-codes';
 
-export { getLogger } from 'log4js'
+export interface AppErrorArgs {
+  name?: string
+  httpCode: StatusCodes
+  description: string
+  isOperational?: boolean
+}
 
-export function bootstrapLogger (): void {
-  const date = new Date()
-  const strDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+export class AppError extends Error {
+  public readonly name: string;
+  public readonly httpCode: StatusCodes;
+  public readonly isOperational: boolean = true;
 
-  configure({
-    appenders: {
-      out: { type: 'stdout' },
-      app: { type: 'file', filename: path.join(__dirname, '..', 'logs', `${strDate}.log`) }
-    },
-    categories: {
-      default: { appenders: ['out', 'app'], level: 'debug' }
+  constructor (args: AppErrorArgs) {
+    super(args.description);
+
+    Object.setPrototypeOf(this, new.target.prototype);
+
+    this.name = args.name ?? 'Error';
+    this.httpCode = args.httpCode;
+
+    if (args.isOperational !== undefined) {
+      this.isOperational = args.isOperational;
     }
-  })
 
-  const logger = log4js.getLogger()
-  logger.level = 'debug'
+    Error.captureStackTrace(this);
+  }
 }

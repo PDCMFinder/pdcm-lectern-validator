@@ -30,8 +30,6 @@ import http from 'http';
 import * as bootstrap from '../src/bootstrap';
 
 const debug = Debug('pdcm-lectern-validator:server');
-import { bootstrapLogger } from '@/utils/loggers';
-bootstrapLogger();
 
 const defaultAppConfigImpl: AppConfig = {
   dictionaryVersion(): string {

@@ -14,32 +14,32 @@
  * License.
  ****************************************************************************** */
 
-import { type Request } from 'express'
-import { BadRequestException } from '@/exceptions/bad-request.exception'
-import { StatusCodes } from 'http-status-codes'
+import { type Request } from 'express';
+import { StatusCodes } from 'http-status-codes';
+import { BadRequestException } from '@/exceptions/bad-request.exception';
 
 const AcceptedFormats = [
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'application/vnd.ms-excel']
+  'application/vnd.ms-excel'];
 
 const validateFileExists = (file: Express.Multer.File | undefined): void => {
   if (file == null) {
-    throw new BadRequestException('No file uploaded', StatusCodes.BAD_REQUEST)
+    throw new BadRequestException('No file uploaded');
   }
-}
+};
 
 const validateFileType = (file: Express.Multer.File | undefined): void => {
-  const mimetype = file?.mimetype ?? 'none'
+  const mimetype = file?.mimetype ?? 'none';
   if (!AcceptedFormats.includes(mimetype)) {
     throw new BadRequestException(
       `Please upload an Excel file. Expected: ${AcceptedFormats.join(',')}. Obtained: ${mimetype}.`,
       StatusCodes.UNSUPPORTED_MEDIA_TYPE
-    )
+    );
   }
-}
+};
 
 export const validateFileInRequest = (request: Request): Express.Multer.File => {
-  validateFileExists(request.file)
-  validateFileType(request.file)
-  return request.file as Express.Multer.File
-}
+  validateFileExists(request.file);
+  validateFileType(request.file);
+  return request.file as Express.Multer.File;
+};
