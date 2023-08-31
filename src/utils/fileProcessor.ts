@@ -14,7 +14,7 @@
  * License.
  ****************************************************************************** */
 
-import { type ProcessedFile } from '@/models/validation.model';
+import { SheetData, type ProcessedFile } from '@/models/validation.model';
 import XLSX from 'xlsx';
 
 class FileProcessor {
@@ -32,8 +32,16 @@ class FileProcessor {
 
     sheets.forEach((sheet: any) => {
       const data = XLSX.utils.sheet_to_json(wb.Sheets[sheet], opts);
-      const dataWithoutComments = removeComments(data);
-      resultMap.set(sheet, dataWithoutComments);
+      const [dataWithoutComments, numberLinesDeleted] = removeComments(data);
+
+      // Set offset of the line number as the number of lines deleted because of comments + 2 (header line + 1 to move from zero index to 1 index).
+      const lineNumberOffset = numberLinesDeleted + 2;
+
+      const sheetData: SheetData = {
+        rows: dataWithoutComments,
+        lineNumberOffset: lineNumberOffset
+      };
+      resultMap.set(sheet, sheetData);
     });
 
     const processedFile: ProcessedFile = {
@@ -45,8 +53,18 @@ class FileProcessor {
   }
 }
 
-const removeComments = (data: any[]): any[] => {
-  return data.filter(record => !(shouldIgnoreRecord(record)));
+// Remove comments and keeps number of lines deleted
+const removeComments = (data: any[]): [any[], number] => {
+  const cleanData: any[] = [];
+  let numberLinesDeleted = 0;
+  data.forEach(record => {
+    if (shouldIgnoreRecord(record)) {
+      numberLinesDeleted++;
+    } else {
+      cleanData.push(record);
+    }
+  })
+  return [cleanData, numberLinesDeleted];
 };
 
 const shouldIgnoreRecord = (record: any): boolean => {

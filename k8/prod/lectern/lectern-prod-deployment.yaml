@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: lectern
-        image: ghcr.io/overture-stack/lectern:edge
+        image: ghcr.io/overture-stack/lectern:1.15.0
         imagePullPolicy: Always
         env:
         - name: MONGO_URL

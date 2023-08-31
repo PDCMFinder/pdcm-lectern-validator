@@ -17,7 +17,7 @@
 import FileProcessor from '../../src/utils/fileProcessor';
 import XLSX from 'xlsx';
 import { Readable } from 'stream';
-import { ProcessedFile } from '@/models/validation.model';
+import { ProcessedFile, SheetData } from '@/models/validation.model';
 
 jest.mock('xlsx', () => ({
   readFile: jest.fn(),
@@ -57,8 +57,14 @@ describe('FileProcessor', () => {
 
     // Call the method
     const result: ProcessedFile = await fileProcessor.processExcelFile(mockFile);
-    const expectedData: Map<string, string[]> = new Map([
-      ['Sheet1', []]
+
+    const expectedData: Map<string, SheetData> = new Map([
+      ['Sheet1',
+        {
+          lineNumberOffset: 4,
+          rows: []
+        }
+      ]
     ]);
 
     // Assertions
@@ -81,12 +87,19 @@ describe('FileProcessor', () => {
     // Call the method
     const result: ProcessedFile = await fileProcessor.processExcelFile(mockFile);
     
-    const expectedData: Map<string, any[]> = new Map([
-      ['Sheet1', [{ id: 'id1'}]]
+
+    const expectedData: Map<string, SheetData> = new Map([
+      ['Sheet1',
+        {
+          lineNumberOffset: 3,
+          rows: [{ id: 'id1' }]
+        }
+      ]
     ]);
 
     // Assertions
     expect(result.fileName).toEqual(mockFileName);
+    
     expect(result.data).toEqual(expectedData);
   });
 });
