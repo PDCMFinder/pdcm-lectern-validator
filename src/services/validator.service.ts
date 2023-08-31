@@ -38,7 +38,8 @@ const errorTypeMapping = new Map<string, string>([
   ['INVALID_ENUM_VALUE', 'Value error'],
   ['UNRECOGNIZED_FIELD', 'Unrecognized field'],
   ['INVALID_BY_FOREIGN_KEY', 'Foreign key violation'],
-  ['INVALID_BY_UNIQUE_KEY', 'Unique key violation']
+  ['INVALID_BY_UNIQUE_KEY', 'Unique key violation'],
+  ['INVALID_BY_UNIQUE', 'Value must be unique']
 ]);
 
 // This allows to override error messages from Lectern. If not entry is found, the original error message will be used in the report.

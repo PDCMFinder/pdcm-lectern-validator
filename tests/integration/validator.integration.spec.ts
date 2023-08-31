@@ -432,6 +432,77 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
     expect(resultAsJSON['sheetsValidationResults']).toEqual(sheetsValidationResults);
   })
 
+  it('should report an error if a value must be unique but is not', async () => {
+    const filePath = `${__dirname}/test_files/value_no_unique.xlsx`;
+
+    mockDictionaryResponse();
+
+    // Load the lectern dictionary. It would use the mock http server so the returned dictionary would be taken from a file.
+    await dictionaryService.instance().loadValidationDictionary("schemaName", '1.0');
+
+    const response = await request(app).post('/validation/upload-excel').attach('file', filePath);
+    const resultAsJSON = JSON.parse(response.text);
+
+    const sheetsValidationResults = [
+      {
+        "sheetName": "patient",
+        "status": "invalid",
+        "result": [
+
+          {
+            "errorType": "Value must be unique",
+            "index": 0,
+            "fieldName": "patient_id",
+            "info": {
+              "value": "A0088",
+              "format": "#/fields/format/ALPHANUMERIC"
+            },
+            "message": "Value for patient_id must be unique."
+          },
+          {
+            "errorType": "Value must be unique",
+            "index": 2,
+            "fieldName": "patient_id",
+            "info": {
+              "value": "A0088",
+              "format": "#/fields/format/ALPHANUMERIC"
+            },
+            "message": "Value for patient_id must be unique."
+          }
+
+        ]
+      },
+      {
+        "sheetName": "patient_sample",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "pdx_model",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "model_validation",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "cell_model",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "sharing",
+        "status": "valid",
+        "result": []
+      }
+    ]
+
+    expect(response.statusCode).toEqual(StatusCodes.OK);
+    expect(resultAsJSON['sheetsValidationResults']).toEqual(sheetsValidationResults);
+  })
+
   it('should report an error if foreign key restriction is violated', async () => {
     const filePath = `${__dirname}/test_files/foreign_key_violated.xlsx`;
 
@@ -529,7 +600,8 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
                 "patient_id",
                 "sample_id",
                 "model_id"
-              ]},
+              ]
+            },
             message: "Key patient_id: A0088, sample_id: RH0000000000D01000, model_id: CRC0228PRaS must be unique.",
           },
           {
@@ -546,7 +618,8 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
                 "patient_id",
                 "sample_id",
                 "model_id"
-              ]},
+              ]
+            },
             message: "Key patient_id: A0088, sample_id: RH0000000000D01000, model_id: CRC0228PRaS must be unique.",
           },
         ]
@@ -570,6 +643,162 @@ describe('Restrictions validated by Lectern/Lectern client', () => {
         "sheetName": "sharing",
         "status": "valid",
         "result": []
+      }
+    ]
+
+    expect(response.statusCode).toEqual(StatusCodes.OK);
+    expect(resultAsJSON['sheetsValidationResults']).toEqual(sheetsValidationResults);
+  })
+
+  it('should be able to report all the Lectern errors supported by the validator', async () => {
+    const filePath = `${__dirname}/test_files/all_errors_present.xlsx`;
+
+    mockDictionaryResponse();
+
+    // Load the lectern dictionary. It would use the mock http server so the returned dictionary would be taken from a file.
+    await dictionaryService.instance().loadValidationDictionary("schemaName", '1.0');
+
+    const response = await request(app).post('/validation/upload-excel').attach('file', filePath);
+    const resultAsJSON = JSON.parse(response.text);
+
+    const sheetsValidationResults = [
+      {
+        "sheetName": "patient",
+        "status": "invalid",
+        "result": [
+          {
+            "errorType": "Value error",
+            "index": 2,
+            "fieldName": "sex",
+            "info": {
+              "value": [
+                "invalid_sex_value"
+              ],
+              "format": "Any of the following values: [male, female, other, not collected, not provided]"
+            },
+            "message": "The provided value/data does not match any of the allowed values."
+          },
+          {
+            "errorType": "Value must be unique",
+            "index": 1,
+            "fieldName": "patient_id",
+            "info": {
+              "value": "SADASD",
+              "format": "#/fields/format/ALPHANUMERIC"
+            },
+            "message": "Value for patient_id must be unique."
+          },
+          {
+            "errorType": "Value must be unique",
+            "index": 2,
+            "fieldName": "patient_id",
+            "info": {
+              "value": "SADASD",
+              "format": "#/fields/format/ALPHANUMERIC"
+            },
+            "message": "Value for patient_id must be unique."
+          }
+        ]
+      },
+      {
+        "sheetName": "patient_sample",
+        "status": "invalid",
+        "result": [
+          {
+            "errorType": "Unique key violation",
+            "index": 1,
+            "fieldName": "patient_id, sample_id, model_id",
+            "info": {
+              "value": {
+                "patient_id": "A0088",
+                "sample_id": "RH0000000000D01000",
+                "model_id": "CRC0228PRaS"
+              },
+              "uniqueKeyFields": [
+                "patient_id",
+                "sample_id",
+                "model_id"
+              ]
+            },
+            "message": "Key patient_id: A0088, sample_id: RH0000000000D01000, model_id: CRC0228PRaS must be unique."
+          },
+          {
+            "errorType": "Unique key violation",
+            "index": 3,
+            "fieldName": "patient_id, sample_id, model_id",
+            "info": {
+              "value": {
+                "patient_id": "A0088",
+                "sample_id": "RH0000000000D01000",
+                "model_id": "CRC0228PRaS"
+              },
+              "uniqueKeyFields": [
+                "patient_id",
+                "sample_id",
+                "model_id"
+              ]
+            },
+            "message": "Key patient_id: A0088, sample_id: RH0000000000D01000, model_id: CRC0228PRaS must be unique."
+          },
+          {
+            "errorType": "Foreign key violation",
+            "index": 2,
+            "fieldName": "patient_id",
+            "info": {
+              "value": {
+                "patient_id": "A0088_X"
+              },
+              "foreignSchema": "patient",
+              "format": "#/fields/format/ALPHANUMERIC"
+            },
+            "message": "Record violates foreign key restriction defined for field(s) patient_id. Key patient_id: A0088_X is not present in schema patient."
+          }
+        ]
+      },
+      {
+        "sheetName": "pdx_model",
+        "status": "invalid",
+        "result": [
+          {
+            "errorType": "Missing required field",
+            "index": 1,
+            "fieldName": "host_strain_name",
+            "info": {
+              "format": "Mouse strain name"
+            },
+            "message": "A required field is missing from the input data."
+          }
+        ]
+      },
+      {
+        "sheetName": "model_validation",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "cell_model",
+        "status": "valid",
+        "result": []
+      },
+      {
+        "sheetName": "sharing",
+        "status": "invalid",
+        "result": [
+          {
+            "errorType": "Invalid format",
+            "index": 1,
+            "fieldName": "email",
+            "info": {
+              "value": [
+                "invalid_email"
+              ],
+              "regex": "^(([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)+,?\\s?)*|(N|n)ot (P|p)rovided|(N|n)ot (C|c)ollected)$",
+              "examples": "j.doe@example.com",
+              "format": "Email address"
+            },
+            "message": "The field's value does not comply with the defined regular expression pattern."
+          }
+        ]
       }
     ]
 
