@@ -26,7 +26,7 @@ import {
 } from '@/models/validation.model';
 import { ConfigurationException } from '@/exceptions/configuration.exception';
 import { BadRequestException } from '@/exceptions/bad-request.exception';
-import { difference } from 'lodash';
+import { difference, round } from 'lodash';
 import getLogger from '@/lib/logger';
 
 const logger = getLogger('VALIDATOR_SERVICE');
@@ -72,10 +72,10 @@ class ValidatorService {
 
     const sheetsValidationResults = this.#processData(validationDictionary, processedFile.data);
 
-    const validationReport: ValidationReport = this.#buildReport(processedFile.fileName, validationDictionary.name, validationDictionary.version, sheetsValidationResults);
-    
-    const modelScore = this.#calculateModelScore(validationReport.status, validationDictionary, processedFile.data)
-    
+    const modelScore = this.#calculateModelScore(sheetsValidationResults, validationDictionary, processedFile.data)
+
+    const validationReport: ValidationReport = this.#buildReport(processedFile.fileName, validationDictionary.name, validationDictionary.version, sheetsValidationResults, modelScore);
+        
     return await Promise.resolve(validationReport);
   }
  
@@ -140,7 +140,8 @@ class ValidatorService {
     fileName: string,
     dictionaryName: string,
     dictionaryVersion: string,
-    sheetsValidationResults: SheetValidationResult[]
+    sheetsValidationResults: SheetValidationResult[],
+    modelScore: object
   ): ValidationReport {
     const reportStatus = this.#getUnifiedStatus(sheetsValidationResults);
 
@@ -150,7 +151,8 @@ class ValidatorService {
       status: reportStatus,
       dictionaryName,
       dictionaryVersion,
-      sheetsValidationResults
+      sheetsValidationResults,
+      modelScore
     };
 
     return validationReport;
@@ -220,9 +222,10 @@ class ValidatorService {
     return pdcmError;
   }
 
-  #calculateModelScore(status: string, validationDictionary: SchemasDictionary, data: Map<string, SheetData>){
+  #calculateModelScore(sheetsValidationResults: SheetValidationResult[], validationDictionary: SchemasDictionary, data: Map<string, SheetData>){
+    const reportStatus = this.#getUnifiedStatus(sheetsValidationResults)
     const modelScores: { [model_id: string]: number } = {};
-    if (status === 'invalid') {
+    if (reportStatus === 'invalid') {
       return modelScores;
 
     }
@@ -295,7 +298,7 @@ class ValidatorService {
       }, 0);
   
       const maxScore = modelType === 'invitro' ? maxScores.invitro : maxScores.pdx;
-      modelScores[modelId] = (modelScores[modelId] / maxScore) * 100; // Calculate percentage
+      modelScores[modelId] = round((modelScores[modelId] / maxScore) * 100, 2); // Calculate percentage
     });
   
     console.log('Model Scores:', modelScores);

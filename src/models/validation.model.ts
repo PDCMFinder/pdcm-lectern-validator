@@ -51,6 +51,7 @@ export interface ValidationReport {
   dictionaryName: string
   dictionaryVersion: string
   sheetsValidationResults: SheetValidationResult[]
+  modelScore: object
 }
 
 export interface RowData {
