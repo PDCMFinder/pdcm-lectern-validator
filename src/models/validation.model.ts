@@ -52,3 +52,8 @@ export interface ValidationReport {
   dictionaryVersion: string
   sheetsValidationResults: SheetValidationResult[]
 }
+
+export interface RowData {
+  [key: string]: any;
+  // Add other properties that row might have
+}
