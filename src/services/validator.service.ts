@@ -230,23 +230,7 @@ class ValidatorService {
 
     }
     
-    // Build weights dictionary
-    const weightsDictionary: { [schemaName: string]: Array<{ fieldName: string; fieldWeight: number; weightForModelType: string }> } = {};
-    validationDictionary.schemas.forEach(schema => {
-      schema.fields.forEach(field => {
-        const { meta } = field;
-        if ( meta && 'field_weight' in meta && 'weight_for_model_type' in meta && typeof meta.field_weight === 'number' && meta?.field_weight > 0 && typeof meta?.weight_for_model_type === 'string') {
-          const schemaName = `${schema.name}.${field.name}`;
-          weightsDictionary[schemaName] = weightsDictionary[schemaName] || [];
-          weightsDictionary[schemaName].push({
-            fieldName: field.name,
-            fieldWeight: meta.field_weight,
-            weightForModelType: meta.weight_for_model_type,
-          });
-        }
-      });
-    });
-  
+    const weightsDictionary = this.#buildDictionary(validationDictionary); 
     // Calculate maximum scores
     const maxScores = Object.values(weightsDictionary).reduce((acc, [{ fieldWeight, weightForModelType }]) => {
       if (weightForModelType === 'pdx' || weightForModelType === 'both') acc.pdx += fieldWeight;
@@ -255,33 +239,9 @@ class ValidatorService {
     }, { pdx: 0, invitro: 0 });
   
     const fieldsWithWeights = Object.keys(weightsDictionary);
-  
-    // Prepare patient and model dictionaries
-    const patientDictionary: { [patient_id: string]: any } = {};
-    const modelDictionary: { [model_id: string]: any } = {};
-  
-    data.forEach(({ rows }, entityName) => {
-      rows.forEach((row: RowData) => {
-        const prefixedRow = Object.fromEntries(Object.entries(row).map(([key, value]) => [`${entityName}.${key}`, value]));
-        const modelId = row.model_id;
-        const patientId = row.patient_id;
-  
-        if (modelId) modelDictionary[modelId] = { ...modelDictionary[modelId], ...prefixedRow };
-        if (patientId) patientDictionary[patientId] = { ...patientDictionary[patientId], ...prefixedRow };
-      });
-    });
-  
-    // Merge patient data into model data
-    Object.keys(modelDictionary).forEach(modelKey => {
-      const modelData = modelDictionary[modelKey];
-      if (modelData.patient_id && patientDictionary[modelData.patient_id]) {
-        Object.assign(modelDictionary[modelKey], patientDictionary[modelData.patient_id]);
-      }
-    });
+    const modelDictionary = this.#buildModelDictionary(data);
   
     // Compute model scores
-    
-  
     Object.keys(modelDictionary).forEach(modelId => {
       const modelData = modelDictionary[modelId];
       const isInvitro = Object.keys(modelData).some(key => key.includes('cell_model'));
@@ -301,9 +261,64 @@ class ValidatorService {
       modelScores[modelId] = round((modelScores[modelId] / maxScore) * 100, 2); // Calculate percentage
     });
   
-    console.log('Model Scores:', modelScores);
+    // console.log('Model Scores:', modelScores);
     return modelScores;
   }
+
+  #buildDictionary(validationDictionary: SchemasDictionary){
+      // Build weights dictionary
+      const weightsDictionary: { [schemaName: string]: Array<{ fieldName: string; fieldWeight: number; weightForModelType: string }> } = {};
+      validationDictionary.schemas.forEach(schema => {
+        schema.fields.forEach(field => {
+          const { meta } = field;
+          if ( scoreMetadataExists(meta) ) {
+            const schemaName = `${schema.name}.${field.name}`;
+            weightsDictionary[schemaName] = weightsDictionary[schemaName] || [];
+            weightsDictionary[schemaName].push({
+              fieldName: field.name,
+              fieldWeight: (meta as any)?.field_weight ?? null,
+              weightForModelType: (meta as any)?.weight_for_model_type ?? null,
+            });
+          }
+        });
+      });
+      return weightsDictionary;
+  }
+  #buildModelDictionary(data: Map<string, SheetData>){
+    // Prepare patient and model dictionaries
+    const patientDictionary: { [patient_id: string]: any } = {};
+    const modelDictionary: { [model_id: string]: any } = {};
+
+    data.forEach(({ rows }, entityName) => {
+      rows.forEach((row: RowData) => {
+        const prefixedRow = Object.fromEntries(Object.entries(row).map(([key, value]) => [`${entityName}.${key}`, value]));
+        const modelId = row.model_id;
+        const patientId = row.patient_id;
+
+        if (modelId) modelDictionary[modelId] = { ...modelDictionary[modelId], ...prefixedRow };
+        if (patientId) patientDictionary[patientId] = { ...patientDictionary[patientId], ...prefixedRow };
+      });
+    });
+
+    // Merge patient data into model data
+    Object.keys(modelDictionary).forEach(modelKey => {
+      const modelData = modelDictionary[modelKey];
+      if (modelData.patient_id && patientDictionary[modelData.patient_id]) {
+        Object.assign(modelDictionary[modelKey], patientDictionary[modelData.patient_id]);
+      }
+    });
+    return modelDictionary
+
+  }
 }
+
+// Add this helper function to your service file or a utility file
+const scoreMetadataExists = (meta: any): meta is FieldDefinition => {
+  return meta &&
+    typeof meta.field_weight === 'number' &&
+    meta.field_weight > 0 &&
+    typeof meta.weight_for_model_type === 'string';
+};
+
 
 export default ValidatorService;
