@@ -51,4 +51,10 @@ export interface ValidationReport {
   dictionaryName: string
   dictionaryVersion: string
   sheetsValidationResults: SheetValidationResult[]
+  modelScore: object
+}
+
+export interface RowData {
+  [key: string]: any;
+  // Add other properties that row might have
 }
