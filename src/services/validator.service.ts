@@ -246,8 +246,17 @@ class ValidatorService {
       const modelData = modelDictionary[modelId];
       const isInvitro = Object.keys(modelData).some(key => key.includes('cell_model'));
       const modelType = isInvitro ? 'invitro' : 'pdx';
-  
-      let score = fieldsWithWeights.reduce((score, key) => {
+        // Get the applicable fields for the current model type based on the weightForModelType
+      const applicableFields = Object.keys(weightsDictionary).filter(key => {
+        const weightForModelType = weightsDictionary[key][0].weightForModelType;
+        return (
+          (modelType === 'pdx' && (weightForModelType === 'pdx' || weightForModelType === 'both')) ||
+          (modelType === 'invitro' && (weightForModelType === 'invitro' || weightForModelType === 'both'))
+        );
+      });
+
+      // Calculate score
+      let score = applicableFields.reduce((score, key) => {
         const value = modelData[key];
         const isValueValid = value && !['not provided', 'not collected'].includes(value.toLowerCase());
         if (isValueValid) {
@@ -256,7 +265,8 @@ class ValidatorService {
         }
         return score;
       }, 0);
-      const missingFields = fieldsWithWeights.filter(key => !(key in modelData));
+  
+      const missingFields = applicableFields.filter(key => !(key in modelData));
 
       const maxScore = modelType === 'invitro' ? maxScores.invitro : maxScores.pdx;
       score = round((score / maxScore) * 100, 0); // Calculate percentage
