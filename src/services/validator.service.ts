@@ -267,10 +267,10 @@ class ValidatorService {
       }, 0);
   
       const missingFields = applicableFields.filter(key => !(key in modelData));
-
+      const mt = modelType == 'pdx' ? 'pdx' : modelData['cell_model.type']
       const maxScore = modelType === 'invitro' ? maxScores.invitro : maxScores.pdx;
       score = round((score / maxScore) * 100, 0); // Calculate percentage
-      modelScores.push({ modelid: modelId, score: score, modelType: modelType, missingFields: missingFields });
+      modelScores.push({ modelid: modelId, score: score, modelType: mt, missingFields: missingFields });
     });
   
     // console.log('Model Scores:', modelScores);
