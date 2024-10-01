@@ -224,7 +224,7 @@ class ValidatorService {
 
   #calculateModelScore(sheetsValidationResults: SheetValidationResult[], validationDictionary: SchemasDictionary, data: Map<string, SheetData>){
     const reportStatus = this.#getUnifiedStatus(sheetsValidationResults)
-    const modelScores: { [model_id: string]: number } = {};
+    const modelScores: { modelid: string, score: number, modelType: string, missingFields: string[] }[] = [];
     if (reportStatus === 'invalid') {
       return modelScores;
 
@@ -247,7 +247,7 @@ class ValidatorService {
       const isInvitro = Object.keys(modelData).some(key => key.includes('cell_model'));
       const modelType = isInvitro ? 'invitro' : 'pdx';
   
-      modelScores[modelId] = fieldsWithWeights.reduce((score, key) => {
+      let score = fieldsWithWeights.reduce((score, key) => {
         const value = modelData[key];
         const isValueValid = value && !['not provided', 'not collected'].includes(value.toLowerCase());
         if (isValueValid) {
@@ -256,9 +256,11 @@ class ValidatorService {
         }
         return score;
       }, 0);
-  
+      const missingFields = fieldsWithWeights.filter(key => !(key in modelData));
+
       const maxScore = modelType === 'invitro' ? maxScores.invitro : maxScores.pdx;
-      modelScores[modelId] = round((modelScores[modelId] / maxScore) * 100, 2); // Calculate percentage
+      score = round((score / maxScore) * 100, 0); // Calculate percentage
+      modelScores.push({ modelid: modelId, score: score, modelType: modelType, missingFields: missingFields });
     });
   
     // console.log('Model Scores:', modelScores);
