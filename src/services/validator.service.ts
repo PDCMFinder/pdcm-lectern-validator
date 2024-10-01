@@ -311,12 +311,11 @@ class ValidatorService {
         if (patientId) patientDictionary[patientId] = { ...patientDictionary[patientId], ...prefixedRow };
       });
     });
-
     // Merge patient data into model data
     Object.keys(modelDictionary).forEach(modelKey => {
       const modelData = modelDictionary[modelKey];
-      if (modelData.patient_id && patientDictionary[modelData.patient_id]) {
-        Object.assign(modelDictionary[modelKey], patientDictionary[modelData.patient_id]);
+      if (modelData['patient_sample.patient_id'] && patientDictionary[modelData['patient_sample.patient_id']]) {
+        Object.assign(modelDictionary[modelKey], patientDictionary[modelData['patient_sample.patient_id']]);
       }
     });
     return modelDictionary
